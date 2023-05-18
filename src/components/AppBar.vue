@@ -2,7 +2,7 @@
     <v-app-bar
         :color="color"
     >
-        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer">
+        <v-app-bar-nav-icon variant="text" @click.stop="handleClickDrawer">
         </v-app-bar-nav-icon>
         <v-app-bar-title class="text-h6 text-white font-weight-bold">
             {{ title }}
@@ -22,5 +22,14 @@ const { color, title } = defineProps({
     title: { type: String, required: true}
 })
 
+const emit = defineEmits<{
+    (e: 'clickDrawer', drawer: boolean): boolean
+}>()
+
 const drawer = ref<boolean>(false);
+
+const handleClickDrawer = () => {
+    drawer.value = !drawer.value
+    emit('clickDrawer', drawer.value)
+}
 </script>

@@ -1,6 +1,6 @@
 <template>
     <v-layout>
-        <AppBar color="orange" title="Test"/> 
+        <AppBar color="orange" title="Test" @click-drawer="handleDrawer"/> 
         <v-navigation-drawer
             v-model="drawer"
             location="left"
@@ -28,6 +28,10 @@ import AppBar from '@/components/AppBar.vue';
 import {ref} from 'vue';
 
 const drawer = ref<boolean>(false);
+
+const handleDrawer = (drawerClicked: boolean) => {
+  drawer.value = drawerClicked
+}
 
 const menuItens = [
     {

@@ -16,6 +16,8 @@
 <script lang="ts" setup>
 import SearchButton from '@/components/SearchButton.vue'
 import CenterItem from '@/components/CenterItem.vue'
+import AnnouncementService from '@/service/AnnouncementService'
+import { onMounted } from 'vue';
 
 const menuItens = [
     {
@@ -34,5 +36,9 @@ const menuItens = [
       data: ["Sub-Categoria 1", "Sub-Categoria 2"]
     }
   ];
+
+onMounted(() => {
+  console.log(AnnouncementService.getCities());
+})
 
 </script>

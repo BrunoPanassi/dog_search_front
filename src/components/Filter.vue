@@ -17,13 +17,22 @@
 import SearchButton from '@/components/SearchButton.vue'
 import CenterItem from '@/components/CenterItem.vue'
 import AnnouncementService from '@/service/AnnouncementService'
-import { onMounted } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 
-const menuItens = [
+interface MenuItens {
+  title: string
+  icon: string
+  data: Array<string>
+}
+
+let cities = ref<Array<string>>([]);
+const computedCities = computed<Array<string>>(() => cities.value);
+
+const menuItens: Array<MenuItens> = [
     {
       title: 'Cidade',
       icon: 'mdi-city',
-      data: ["Araçatuba", "Birigui"]
+      data: cities.value
     },
     {
       title: 'Categoria',
@@ -37,8 +46,19 @@ const menuItens = [
     }
   ];
 
+const getCities = async () => {
+  try {
+    const { data } = await AnnouncementService.getCities();
+    cities.value.push(...data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 onMounted(() => {
-  console.log(AnnouncementService.getCities());
+  getCities();
 })
+
+
 
 </script>

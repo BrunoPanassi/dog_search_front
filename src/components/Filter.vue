@@ -17,7 +17,9 @@
 import SearchButton from '@/components/SearchButton.vue'
 import CenterItem from '@/components/CenterItem.vue'
 import AnnouncementService from '@/service/AnnouncementService'
+import CategoryService from '@/service/CategoryService';
 import { onMounted, computed, ref } from 'vue';
+import type { Category } from '@/types/category.model';
 
 interface MenuItens {
   title: string
@@ -26,25 +28,27 @@ interface MenuItens {
 }
 
 let cities = ref<Array<string>>([]);
+let categories = ref<Array<string>>([]);
 const computedCities = computed<Array<string>>(() => cities.value);
+const computedCategories = computed<Array<string>>(() => categories.value);
 
-const menuItens: Array<MenuItens> = [
+const menuItens = ref<Array<MenuItens>>([
     {
       title: 'Cidade',
       icon: 'mdi-city',
-      data: cities.value
+      data: computedCities.value
     },
     {
       title: 'Categoria',
       icon: 'mdi-menu',
-      data: ["Categoria 1", "Categoria 2"]
+      data: computedCategories.value
     },
     {
       title: 'Sub-Categoria',
       icon: 'mdi-microsoft-xbox-controller-menu',
       data: ["Sub-Categoria 1", "Sub-Categoria 2"]
     }
-  ];
+  ]);
 
 const getCities = async () => {
   try {
@@ -55,8 +59,19 @@ const getCities = async () => {
   }
 }
 
-onMounted(() => {
-  getCities();
+const getCategories = async () => {
+  try {
+    let { data } = await CategoryService.getAll();
+    data = data.map((c:Category) => c.name)
+    categories.value.push(...data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+onMounted(async () => {
+  await getCities();
+  await getCategories();
 })
 
 

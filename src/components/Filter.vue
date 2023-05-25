@@ -5,8 +5,10 @@
         :label="item.title"
         :items="item.data"
         :disabled="item.disabled"
+        return-object
         :prepend-inner-icon="item.icon"
         flat
+        @update:model-value="item.onChange"
     >
     </v-select>
     <CenterItem>
@@ -20,15 +22,20 @@ import CenterItem from '@/components/CenterItem.vue'
 import AnnouncementService from '@/service/AnnouncementService'
 import CategoryService from '@/service/CategoryService';
 import SubCategoryService from '@/service/SubCategoryService'
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, ComputedRef } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
 
 interface MenuItens {
   title: string
   icon: string
   data: Array<string>
-  disabled: boolean
+  disabled: boolean | ComputedRef<boolean>
+  onChange?: Function
 }
+
+let city = ref<string>("");
+let category = ref<string>("");
+let subCategory = ref<string>("");
 
 let cities = ref<Array<string>>([]);
 let categories = ref<Array<string>>([]);
@@ -36,25 +43,33 @@ let subCategories = ref<Array<string>>([]);
 const computedCities = computed<Array<string>>(() => cities.value);
 const computedCategories = computed<Array<string>>(() => categories.value);
 const computedSubCategories = computed<Array<string>>(() => subCategories.value);
+const isCategorySelected = computed<boolean>(() => category.value.length == 0);
+
+const onSelectCity = (citySelected: string) => { city.value = citySelected };
+const onSelectCategory = (categorySelected: string) => { category.value = categorySelected };
+const onSelectSubCategory = (subCategorySelected: string) => { subCategory.value = subCategorySelected };
 
 const menuItens = ref<Array<MenuItens>>([
     {
       title: 'Cidade',
       icon: 'mdi-city',
       data: computedCities.value,
-      disabled: false
+      disabled: false,
+      onChange: onSelectCity
     },
     {
       title: 'Categoria',
       icon: 'mdi-menu',
       data: computedCategories.value,
-      disabled: false
+      disabled: false,
+      onChange: onSelectCategory
     },
     {
       title: 'Sub-Categoria',
       icon: 'mdi-microsoft-xbox-controller-menu',
       data: computedSubCategories.value,
-      disabled: false
+      disabled: isCategorySelected,
+      onChange: onSelectSubCategory
     }
   ]);
 

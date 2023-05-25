@@ -12,7 +12,7 @@
     >
     </v-select>
     <CenterItem>
-        <SearchButton/>
+        <SearchButton :disable="!isAllItensSelected"/>
     </CenterItem>
 </template>
 
@@ -24,6 +24,7 @@ import CategoryService from '@/service/CategoryService';
 import SubCategoryService from '@/service/SubCategoryService'
 import { onMounted, computed, ref, ComputedRef } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
+import type { Filter } from '@/types/filter';
 
 interface MenuItens {
   title: string
@@ -43,11 +44,23 @@ let subCategories = ref<Array<string>>([]);
 const computedCities = computed<Array<string>>(() => cities.value);
 const computedCategories = computed<Array<string>>(() => categories.value);
 const computedSubCategories = computed<Array<string>>(() => subCategories.value);
+
 const isCategorySelected = computed<boolean>(() => category.value.length == 0);
+const itensSelected = computed<Filter>(() => {
+  return {
+    city: city.value,
+    category: category.value,
+    subCategory: subCategory.value
+  }
+})
+const isAllItensSelected = computed<boolean>(() => Object.values(itensSelected.value).every((value:string) => !!value))
 
 const onSelectCity = (citySelected: string) => { city.value = citySelected };
 const onSelectCategory = (categorySelected: string) => { category.value = categorySelected };
-const onSelectSubCategory = (subCategorySelected: string) => { subCategory.value = subCategorySelected };
+const onSelectSubCategory = (subCategorySelected: string) => { 
+  subCategory.value = subCategorySelected
+  console.log(itensSelected.value)
+ };
 
 const menuItens = ref<Array<MenuItens>>([
     {

@@ -11,6 +11,10 @@ class SubCategoryService {
         return AxiosService.get(`${this.path}/${id}`);
     }
 
+    getByCategory(name: String) {
+        return AxiosService.get(`${this.path}/category?name=${name}`)
+    }
+
     
 }
 

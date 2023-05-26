@@ -5,6 +5,7 @@
         :label="item.title"
         :items="item.data"
         :disabled="item.disabled"
+        :loading="item.loading"
         return-object
         :prepend-inner-icon="item.icon"
         flat
@@ -33,6 +34,7 @@ interface MenuItens {
   data: Array<string>
   disabled: boolean | ComputedRef<boolean>
   onChange?: Function
+  loading?: boolean
 }
 
 let city = ref<string>("");
@@ -42,6 +44,10 @@ let subCategory = ref<string>("");
 let cities = ref<Array<string>>([]);
 let categories = ref<Array<string>>([]);
 let subCategories = ref<Array<string>>([]);
+
+let cityLoading = false;
+let categoryLoading = false;
+let subCategoryLoading = false;
 
 let announcements: Array<AnnouncementDTO> = [];
 
@@ -60,7 +66,10 @@ const itensSelected = computed<Filter>(() => {
 const isAllItensSelected = computed<boolean>(() => Object.values(itensSelected.value).every((value:string) => !!value))
 
 const onSelectCity = (citySelected: string) => { city.value = citySelected };
-const onSelectCategory = (categorySelected: string) => { category.value = categorySelected };
+const onSelectCategory = async (categorySelected: string) => { 
+  category.value = categorySelected;
+  await getSubCategories();
+};
 const onSelectSubCategory = (subCategorySelected: string) => { subCategory.value = subCategorySelected };
 
 const menuItens = ref<Array<MenuItens>>([
@@ -69,30 +78,36 @@ const menuItens = ref<Array<MenuItens>>([
       icon: 'mdi-city',
       data: computedCities.value,
       disabled: false,
-      onChange: onSelectCity
+      onChange: onSelectCity,
+      loading: cityLoading
     },
     {
       title: 'Categoria',
       icon: 'mdi-menu',
       data: computedCategories.value,
       disabled: false,
-      onChange: onSelectCategory
+      onChange: onSelectCategory,
+      loading: categoryLoading
     },
     {
       title: 'Sub-Categoria',
       icon: 'mdi-microsoft-xbox-controller-menu',
       data: computedSubCategories.value,
       disabled: isCategorySelected,
-      onChange: onSelectSubCategory
+      onChange: onSelectSubCategory,
+      loading: subCategoryLoading
     }
   ]);
 
 const getCities = async () => {
   try {
+    cityLoading = true;
     const { data } = await AnnouncementService.getCities();
     cities.value.push(...data);
   } catch (e) {
     console.error(e);
+  } finally {
+    cityLoading = false;
   }
 }
 
@@ -108,12 +123,17 @@ const getCategories = async () => {
 
 const getSubCategories = async () => {
   try {
-    let { data } = await SubCategoryService.getAll();
+    subCategoryLoading = true;
+    let { data } = await SubCategoryService.getByCategory(category.value);
     data = data.map((c:IdAndName) => c.name)
+    subCategories.value.splice(0);
     subCategories.value.push(...data);
   } catch (e) {
     console.error(e);
+  } finally {
+    subCategoryLoading = false;
   }
+
 }
 
 const getAnnouncements = async () => {
@@ -133,7 +153,6 @@ const buttonClicked = async () => { await getAnnouncements() }
 onMounted(async () => {
   await getCities();
   await getCategories();
-  await getSubCategories();
 })
 
 

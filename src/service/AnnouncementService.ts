@@ -1,4 +1,5 @@
 import AxiosService from "./AxiosService";
+import { CityAndSubCategory } from "@/types/announcement.cityAndSubCategory";
 
 class AnnouncementService {
     path = '/announcement';
@@ -13,6 +14,10 @@ class AnnouncementService {
 
     getCities() {
         return AxiosService.get(`${this.path}/cities`)
+    }
+
+    getCityAndSubCategory(DTO: CityAndSubCategory) {
+        return AxiosService.post(`${this.path}/city-and-sub-category`, DTO)
     }
 }
 

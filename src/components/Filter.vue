@@ -12,7 +12,7 @@
     >
     </v-select>
     <CenterItem>
-        <SearchButton :disable="!isAllItensSelected"/>
+        <SearchButton :disable="!isAllItensSelected" @clicked="buttonClicked"/>
     </CenterItem>
 </template>
 
@@ -25,6 +25,7 @@ import SubCategoryService from '@/service/SubCategoryService'
 import { onMounted, computed, ref, ComputedRef } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
 import type { Filter } from '@/types/filter';
+import type { AnnouncementDTO } from '@/types/announcement.dto';
 
 interface MenuItens {
   title: string
@@ -41,6 +42,9 @@ let subCategory = ref<string>("");
 let cities = ref<Array<string>>([]);
 let categories = ref<Array<string>>([]);
 let subCategories = ref<Array<string>>([]);
+
+let announcements: Array<AnnouncementDTO> = [];
+
 const computedCities = computed<Array<string>>(() => cities.value);
 const computedCategories = computed<Array<string>>(() => categories.value);
 const computedSubCategories = computed<Array<string>>(() => subCategories.value);
@@ -57,10 +61,7 @@ const isAllItensSelected = computed<boolean>(() => Object.values(itensSelected.v
 
 const onSelectCity = (citySelected: string) => { city.value = citySelected };
 const onSelectCategory = (categorySelected: string) => { category.value = categorySelected };
-const onSelectSubCategory = (subCategorySelected: string) => { 
-  subCategory.value = subCategorySelected
-  console.log(itensSelected.value)
- };
+const onSelectSubCategory = (subCategorySelected: string) => { subCategory.value = subCategorySelected };
 
 const menuItens = ref<Array<MenuItens>>([
     {
@@ -114,6 +115,20 @@ const getSubCategories = async () => {
     console.error(e);
   }
 }
+
+const getAnnouncements = async () => {
+  try {
+    const { data } = await AnnouncementService.getCityAndSubCategory({
+      city: city.value,
+      subCategory: subCategory.value
+    })
+    announcements = data;
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const buttonClicked = async () => { await getAnnouncements() }
 
 onMounted(async () => {
   await getCities();

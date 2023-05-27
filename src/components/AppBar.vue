@@ -12,19 +12,13 @@
         <v-btn variant="text" icon="mdi-filter"></v-btn>
         <v-btn variant="text" icon="mdi-dots-vertical"></v-btn>
     </v-app-bar>
-    <v-navigation-drawer
-        v-model="drawer"
-        location="left"
-    >
-        <Filter @clicked="handleClickDrawer"/>
-    </v-navigation-drawer>
+    <HomeNavigationDrawer/>
 </template>
 
 <script lang="ts" setup>
-import Filter from '@/components/Filter.vue'
-import {ref} from 'vue';
-
-const drawer = ref<boolean>(false);
+import HomeNavigationDrawer from '@/components/HomeNavigationDrawer.vue'
+import { useDrawerStore } from '@/store/drawer';
+const drawerStore = useDrawerStore();
 
 const { color, title } = defineProps({
     color: { type: String, required: true},
@@ -32,7 +26,7 @@ const { color, title } = defineProps({
 })
 
 const handleClickDrawer = () => {
-    drawer.value = !drawer.value
+    drawerStore.drawerClicked()
 }
 
 

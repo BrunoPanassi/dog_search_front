@@ -1,14 +1,11 @@
 <template>
     <v-layout>
-        <AppBar :color="appBar.color" :title="appBar.title"/>
+        <AppBar/>
+        <AdminNavigationDrawer/>
     </v-layout>
 </template>
 
 <script lang="ts" setup>
 import AppBar from '@/components/AppBar.vue';
-
-const appBar = {
-  color: "orange",
-  title: "Test"
-}
+import AdminNavigationDrawer from '@/components/AdminNavigationDrawer.vue'
 </script>

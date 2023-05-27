@@ -16,7 +16,7 @@
         v-model="drawer"
         location="left"
     >
-        <Filter />
+        <Filter @clicked="handleClickDrawer"/>
     </v-navigation-drawer>
 </template>
 

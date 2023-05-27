@@ -1,38 +1,18 @@
 <template>
     <v-main>
         <Card
-            v-for="(card) in cards"
+            v-for="(card) in announcementStore.getAnnouncements"
             :title="card.title" 
-            :subtitle="card.subtitle"
-            :price="card.price"
+            :subtitle="card.text"
+            :price="2000"
         />
     </v-main>
 </template>
 
 <script lang="ts" setup>
-
 import Card from '@/components/Card.vue'
+import { useAnnouncementStore } from '@/store/announcement';
 
-const cards = [
-    {
-        title: "Lorem Ipsum",
-        subtitle: "lorem ipsum sit dolor amet...",
-        price: 2000
-    },
-    {
-        title: "Lorem Ipsum",
-        subtitle: "lorem ipsum sit dolor amet...",
-        price: 2000
-    },
-    {
-        title: "Lorem Ipsum",
-        subtitle: "lorem ipsum sit dolor amet...",
-        price: 2000
-    },
-    {
-        title: "Lorem Ipsum",
-        subtitle: "lorem ipsum sit dolor amet...",
-        price: 2000
-    }
-]
+const announcementStore = useAnnouncementStore();
+
 </script>

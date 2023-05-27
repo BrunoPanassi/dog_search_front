@@ -26,7 +26,7 @@ import SubCategoryService from '@/service/SubCategoryService'
 import { onMounted, computed, ref, ComputedRef } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
 import type { Filter } from '@/types/filter';
-import type { AnnouncementDTO } from '@/types/announcement.dto';
+import { useAnnouncementStore } from '@/store/announcement';
 
 interface MenuItens {
   title: string
@@ -49,7 +49,9 @@ let cityLoading = false;
 let categoryLoading = false;
 let subCategoryLoading = false;
 
-let announcements: Array<AnnouncementDTO> = [];
+const announcementStore = useAnnouncementStore();
+
+const emit = defineEmits(['clicked'])
 
 const computedCities = computed<Array<string>>(() => cities.value);
 const computedCategories = computed<Array<string>>(() => categories.value);
@@ -142,13 +144,16 @@ const getAnnouncements = async () => {
       city: city.value,
       subCategory: subCategory.value
     })
-    announcements = data;
+    announcementStore.setAnnnouncements(data);
   } catch (e) {
     console.error(e)
   }
 }
 
-const buttonClicked = async () => { await getAnnouncements() }
+const buttonClicked = async () => { 
+  emit('clicked')
+  await getAnnouncements()
+}
 
 onMounted(async () => {
   await getCities();

@@ -2,7 +2,7 @@
     <v-btn 
         color="green"
         :disabled="disable"
-        @click="$emit('clicked')"
+        @click="emit('clicked')"
     >
         Procurar
     </v-btn>

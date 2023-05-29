@@ -1694,10 +1694,10 @@ vue@^3.3.0:
     "@vue/server-renderer" "3.3.4"
     "@vue/shared" "3.3.4"
 
-vuetify@^3.0.0:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-3.2.3.tgz#05767c3d88068654b757d33789b8c249f1d38e00"
-  integrity sha512-o7IJm/P5Ttp9ItF1ytQihsLzv4jxIYVfI4Ypkkqc4A7N2MeTmkDOPGbDNUgJ+G1p2upL00LCbc73A9YM8xYVpg==
+vuetify@^3.3.1:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-3.3.2.tgz#8682486eb36b5d9d64c8f1c2bdfe36119f6ffbc6"
+  integrity sha512-m/R42di8FlyMaoktUe6k8JbF+A0vbJMpjQrZK7nH1ptK8VinVVQcaw+9m94wlO74IMR+LubxLh5t9I2ZtVCvjw==
 
 webfontloader@^1.0.0:
   version "1.6.28"

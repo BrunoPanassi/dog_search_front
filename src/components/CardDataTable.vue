@@ -8,13 +8,14 @@
                 <v-toolbar flat>
                     <v-toolbar-title>{{ tableSelected }}</v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <Dialog></Dialog>
+                    <Dialog :dialog-clicked="dialog" @on-dialog-clicked="onCloseDialog()"></Dialog>
                 </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
                 <v-icon
                     size="small"
                     class="me-2"
+                    @click="onEditItem()"
                 >
                     mdi-pencil
                 </v-icon>
@@ -42,6 +43,7 @@ const headers = [
 ];
 
 let categories = ref<Array<IdAndName>>([]);
+let dialog = ref<boolean>(false);
 
 const adminTableSelectStore = useAdminTableSelectStore()
 const tableSelected = computed(() => {
@@ -58,6 +60,9 @@ const getCategories = async() => {
         console.error(e);
     }
 }
+
+const onEditItem = () => { dialog.value = true }
+const onCloseDialog = () => { dialog.value = false }
 
 onMounted(async () => {
     await getCategories();

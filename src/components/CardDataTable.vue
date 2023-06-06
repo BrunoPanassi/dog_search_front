@@ -8,14 +8,48 @@
                 <v-toolbar flat>
                     <v-toolbar-title>{{ tableSelected }}</v-toolbar-title>
                     <v-spacer></v-spacer>
-                    <Dialog :dialog-clicked="dialog" @on-dialog-clicked="onCloseDialog()"></Dialog>
+                    <Dialog 
+                        :dialog-clicked="dialog" 
+                        @on-dialog-clicked="onCloseDialog()"
+                        @on-new-clicked="onNewClicked()"
+                    >
+                       <template v-slot:title>
+                        {{ title  }} 
+                       </template>
+                       <template v-slot:content>
+                         <v-text-field 
+                            label="Categoria"
+                            hide-details="auto"
+                            density="compact"
+                            v-model="selectedCategory.name"
+                         ></v-text-field>
+                       </template>
+                       <template v-slot:actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="red-darken-1"
+                            variant="text"
+                            @click="onCloseDialog()"
+                        >
+                            Cancel
+                        </v-btn>
+                        <v-btn
+                            color="green-darken-1"
+                            variant="text"
+                            :disabled="!selectedCategory.name"
+                            @click="onSaveItem()"
+                        >
+                            Save
+                        </v-btn>
+                       </template>
+                    </Dialog>
                 </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
                 <v-icon
                     size="small"
                     class="me-2"
-                    @click="onEditItem()"
+                    @click="onEditItem(item.raw)"
                 >
                     mdi-pencil
                 </v-icon>
@@ -32,7 +66,7 @@
 <script lang="ts" setup>
 import { useAdminTableSelectStore } from '@/store/adminTableSelect';
 import { IdAndName } from '@/types/idAndName';
-import { ref,computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import CategorySerice from '@/service/CategoryService'
 import Dialog from '@/components/Dialog.vue'
 
@@ -44,6 +78,7 @@ const headers = [
 
 let categories = ref<Array<IdAndName>>([]);
 let dialog = ref<boolean>(false);
+let selectedCategory: IdAndName;
 
 const adminTableSelectStore = useAdminTableSelectStore()
 const tableSelected = computed(() => {
@@ -51,6 +86,8 @@ const tableSelected = computed(() => {
 })
 
 const capitalize = (text: string) => { return `${text.charAt(0).toUpperCase()}${text.slice(1)}` }
+
+const title = computed(() => selectedCategory.id !== 0 ? 'Edit Item' : 'New Item')
 
 const getCategories = async() => { 
     try {
@@ -61,7 +98,19 @@ const getCategories = async() => {
     }
 }
 
-const onEditItem = () => { dialog.value = true }
+const onNewClicked = () => {
+    selectedCategory = { id: 0, name: ""}
+    dialog.value = true
+}
+
+const onSaveItem = () => {
+    console.log(selectedCategory)
+}
+
+const onEditItem = (item: IdAndName) => { 
+    selectedCategory = item;
+    dialog.value = !dialog.value 
+}
 const onCloseDialog = () => { dialog.value = false }
 
 onMounted(async () => {

@@ -5,12 +5,21 @@
                 color="primary"
                 dark
                 v-bind="props"
+                @click="onNewClicked()"
             >
                 Adicionar
             </v-btn>
         </template>
         <v-card>
-            <v-card-title> Dialog </v-card-title>
+            <v-card-title>
+                <slot name="title"></slot>
+            </v-card-title>
+            <v-card-text>
+                <slot name="content"></slot>
+            </v-card-text>
+            <v-card-actions>
+                <slot name="actions"></slot>
+            </v-card-actions>
             <v-btn @click.stop="onCloseDialog()">
                 Close
             </v-btn>
@@ -27,9 +36,13 @@ const props = defineProps({
     dialogClicked: Boolean
 })
 
-const emit = defineEmits(['onDialogClicked'])
+const emit = defineEmits(['onDialogClicked', 'onNewClicked'])
 
 const { dialogClicked } = toRefs(props);
+
+const onNewClicked = () => {
+    emit('onNewClicked')
+}
 
 const onCloseDialog = () => { 
     dialog.value = false

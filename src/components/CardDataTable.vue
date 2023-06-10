@@ -3,6 +3,7 @@
         <v-data-table
             :headers="headers"
             :items="categories"
+            :loading="loading"
         >
             <template v-slot:top>
                 <v-toolbar flat>
@@ -11,17 +12,18 @@
                     <Dialog 
                         :dialog-clicked="dialog" 
                         @on-dialog-clicked="onCloseDialog()"
-                        @on-new-clicked="onNewClicked()"
+                        @on-new-clicked="onNewItem()"
                     >
                        <template v-slot:title>
-                        {{ title  }} 
+                        {{ title }}
                        </template>
                        <template v-slot:content>
                          <v-text-field 
                             label="Categoria"
                             hide-details="auto"
                             density="compact"
-                            v-model="selectedCategory.name"
+                            v-model="name"
+
                          ></v-text-field>
                        </template>
                        <template v-slot:actions>
@@ -36,7 +38,8 @@
                         <v-btn
                             color="green-darken-1"
                             variant="text"
-                            :disabled="!selectedCategory.name"
+                            :disabled="!name"
+                            :loading="loading"
                             @click="onSaveItem()"
                         >
                             Save
@@ -55,6 +58,7 @@
                 </v-icon>
                 <v-icon
                     size="small"
+                    @click="onDeleteItem(item.raw)"
                 >
                     mdi-delete
                 </v-icon>
@@ -78,40 +82,104 @@ const headers = [
 
 let categories = ref<Array<IdAndName>>([]);
 let dialog = ref<boolean>(false);
-let selectedCategory: IdAndName;
+let selectedCategory = ref<IdAndName>({id: 0, name: ''});
+let name = ref<string>('');
+let loading = ref<boolean>(false);
+const selectedComputed = computed({
+    get: () => selectedCategory.value,
+    set: (val) => {
+        selectedCategory.value = val
+    }
+})
+const isOnUpdate = computed(() => selectedComputed.value.id !== 0)
+const title = computed(() => !isOnUpdate.value ? 'New Item' : 'Edit Item')
 
 const adminTableSelectStore = useAdminTableSelectStore()
 const tableSelected = computed(() => {
     return capitalize(adminTableSelectStore.whichTableWasSelected)
 })
+const onLoading = () => { loading.value = !loading.value };
 
 const capitalize = (text: string) => { return `${text.charAt(0).toUpperCase()}${text.slice(1)}` }
 
-const title = computed(() => selectedCategory.id !== 0 ? 'Edit Item' : 'New Item')
-
 const getCategories = async() => { 
     try {
+        onLoading()
+        categories.value = [];
         const { data } = await CategorySerice.getAll()
         categories.value.push(...data)
     } catch (e) {
         console.error(e);
+    } finally {
+        onLoading()
     }
 }
 
-const onNewClicked = () => {
-    selectedCategory = { id: 0, name: ""}
+const onSaveCategory = async () => {
+    try {
+        onLoading();
+        await CategorySerice.save(selectedComputed.value);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
+const onUpdateCategory = async () => {
+    try {
+        onLoading();
+        await CategorySerice.update(selectedComputed.value);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
+const onDeleteCategory = async () => {
+    try {
+        onLoading();
+        await CategorySerice.delete(selectedComputed.value.id)
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
+const onNewItem = () => {
+    name.value = ""
+    selectedComputed.value = { id: 0, name: ""}
     dialog.value = true
 }
 
-const onSaveItem = () => {
-    console.log(selectedCategory)
+const onSaveItem = async () => {
+    selectedComputed.value.name = name.value;
+    if (isOnUpdate.value) {
+        await onUpdateCategory();
+    } else {
+        await onSaveCategory();
+    }
+    onCloseDialog();
+    await getCategories();
 }
 
 const onEditItem = (item: IdAndName) => { 
-    selectedCategory = item;
+    name.value = item.name;
+    selectedComputed.value = item;
     dialog.value = !dialog.value 
 }
-const onCloseDialog = () => { dialog.value = false }
+
+const onDeleteItem = async (item: IdAndName) => {
+    selectedCategory.value = item;
+    await onDeleteCategory();
+    await getCategories();
+}
+
+const onCloseDialog = () => {
+    dialog.value = false 
+}
 
 onMounted(async () => {
     await getCategories();

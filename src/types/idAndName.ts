@@ -1,5 +1,5 @@
 interface IdAndName {
-    id?: number
+    id: number
     name: string
 }
 

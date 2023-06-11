@@ -36,26 +36,16 @@
                             :disable="!name.length"
                             @close="onCloseDialog()"
                             @confirm="onSaveItem()" 
-                        >
-                        </ActionButtons>
+                        />
                        </template>
                     </Dialog>
                 </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
-                <v-icon
-                    size="small"
-                    class="me-2"
-                    @click="onEditItem(item.raw)"
-                >
-                    mdi-pencil
-                </v-icon>
-                <v-icon
-                    size="small"
-                    @click="onDeleteDialog(item.raw)"
-                >
-                    mdi-delete
-                </v-icon>
+                <DataTableActionButtons 
+                    @edit="onEditItem(item.raw)" 
+                    @delete="onDeleteDialog(item.raw)" 
+                />
             </template>
         </v-data-table>
         <Dialog 
@@ -77,9 +67,8 @@
                     :loading="loading"
                     @close="onCloseDialog()"
                     @confirm="onDeleteItem()" 
-                >
-                </ActionButtons>
-            </template>
+                />
+           </template>
         </Dialog>
     </v-card>
 </template>
@@ -91,6 +80,7 @@ import { ref, computed, onMounted } from 'vue'
 import CategorySerice from '@/service/CategoryService'
 import Dialog from '@/components/Dialog.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
+import DataTableActionButtons from '@/components/DataTableActionButtons.vue'
 
 const headers = [
   { title: "Id", key: "id" },

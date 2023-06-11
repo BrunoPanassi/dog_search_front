@@ -1,6 +1,5 @@
 import { IdAndName } from "@/types/idAndName";
 import AxiosService from "./AxiosService";
-import { Axios } from "axios";
 
 class CategoryService {
     path = '/category';

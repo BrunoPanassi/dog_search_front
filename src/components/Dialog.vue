@@ -6,13 +6,20 @@
                 dark
                 v-bind="props"
                 @click="onNewClicked()"
+                v-if="addButton"
             >
                 Adicionar
             </v-btn>
         </template>
         <v-card>
             <v-card-title>
-                <slot name="title"></slot>
+                <div class="d-flex flex-row">
+                    <slot name="title"></slot>
+                    <v-spacer></v-spacer>
+                    <v-icon @click.stop="onCloseDialog()">
+                        mdi-close
+                    </v-icon>
+                </div>
             </v-card-title>
             <v-card-text>
                 <slot name="content"></slot>
@@ -20,9 +27,6 @@
             <v-card-actions>
                 <slot name="actions"></slot>
             </v-card-actions>
-            <v-btn @click.stop="onCloseDialog()">
-                Close
-            </v-btn>
         </v-card>
     </v-dialog>
 </template>
@@ -33,12 +37,13 @@ import { ref, watch, toRefs } from 'vue'
 let dialog = ref<boolean>(false);
 
 const props = defineProps({
-    dialogClicked: Boolean
+    dialogClicked: { type: Boolean, required: true},
+    addButton: { type: Boolean, required: true}
 })
 
 const emit = defineEmits(['onDialogClicked', 'onNewClicked'])
 
-const { dialogClicked } = toRefs(props);
+const { dialogClicked, addButton } = toRefs(props);
 
 const onNewClicked = () => {
     emit('onNewClicked')

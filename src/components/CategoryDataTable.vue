@@ -10,12 +10,13 @@
                     <v-toolbar-title>{{ tableSelected }}</v-toolbar-title>
                     <v-spacer></v-spacer>
                     <Dialog 
-                        :dialog-clicked="dialog" 
+                        :dialog-clicked="dialog"
+                        :add-button="true" 
                         @on-dialog-clicked="onCloseDialog()"
                         @on-new-clicked="onNewItem()"
                     >
                        <template v-slot:title>
-                        {{ title }}
+                            {{ title }}
                        </template>
                        <template v-slot:content>
                          <v-text-field 
@@ -58,12 +59,41 @@
                 </v-icon>
                 <v-icon
                     size="small"
-                    @click="onDeleteItem(item.raw)"
+                    @click="onDeleteDialog(item.raw)"
                 >
                     mdi-delete
                 </v-icon>
             </template>
         </v-data-table>
+        <Dialog 
+            :dialog-clicked="deleteDialog"
+            :add-button="false"
+        >
+            <template v-slot:title>
+                Confirmar
+            </template>
+            <template v-slot:content>
+                <p class="text-h6 text-center">Deseja excluir o registro?</p>
+            </template>
+            <template v-slot:actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="red-darken-1"
+                    variant="text"
+                    @click="onCloseDialog()"
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    color="green-darken-1"
+                    variant="text"
+                    :loading="loading"
+                    @click="onDeleteItem()"
+                >
+                    Delete
+                </v-btn>
+            </template>
+        </Dialog>
     </v-card>
 </template>
 
@@ -82,9 +112,12 @@ const headers = [
 
 let categories = ref<Array<IdAndName>>([]);
 let dialog = ref<boolean>(false);
-let selectedCategory = ref<IdAndName>({id: 0, name: ''});
+let deleteDialog = ref<boolean>(false);
+
 let name = ref<string>('');
 let loading = ref<boolean>(false);
+
+let selectedCategory = ref<IdAndName>({id: 0, name: ''});
 const selectedComputed = computed({
     get: () => selectedCategory.value,
     set: (val) => {
@@ -148,6 +181,11 @@ const onDeleteCategory = async () => {
     }
 }
 
+const onDeleteDialog = (item: IdAndName) => {
+    selectedComputed.value = item
+    deleteDialog.value = true
+}
+
 const onNewItem = () => {
     name.value = ""
     selectedComputed.value = { id: 0, name: ""}
@@ -171,14 +209,15 @@ const onEditItem = (item: IdAndName) => {
     dialog.value = !dialog.value 
 }
 
-const onDeleteItem = async (item: IdAndName) => {
-    selectedCategory.value = item;
-    await onDeleteCategory();
-    await getCategories();
+const onDeleteItem = async () => {
+    await onDeleteCategory()
+    await getCategories()
+    onCloseDialog()
 }
 
 const onCloseDialog = () => {
-    dialog.value = false 
+    dialog.value = false
+    deleteDialog.value = false
 }
 
 onMounted(async () => {

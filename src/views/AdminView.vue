@@ -1,9 +1,19 @@
 <template>
     <v-main>
-        <CardDataTable></CardDataTable>
+        <CategoryDataTable v-if="tableSelected == 'category'"></CategoryDataTable>
+        <div v-else>
+            Selecione uma tela no menu ao lado.
+        </div>
     </v-main>
 </template>
 
 <script lang="ts" setup>
-import CardDataTable from '@/components/CardDataTable.vue'
+import { computed } from 'vue';
+import { useAdminTableSelectStore } from '@/store/adminTableSelect';
+import CategoryDataTable from '@/components/CategoryDataTable.vue'
+
+const adminTableSelectStore = useAdminTableSelectStore()
+const tableSelected = computed(() => {
+    return adminTableSelectStore.whichTableWasSelected
+})
 </script>

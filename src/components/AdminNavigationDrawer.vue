@@ -47,6 +47,6 @@ const listClick = (itemClicked: string) => {
 }
 
 onMounted(() => {
-    adminTableSelectStore.tableSelect(items[0].value)
+    drawerStore.drawerClicked()
 })
 </script>

@@ -38,7 +38,7 @@ let dialog = ref<boolean>(false);
 
 const props = defineProps({
     dialogClicked: { type: Boolean, required: true},
-    addButton: { type: Boolean, required: true}
+    addButton: { type: Boolean, required: true, default: false}
 })
 
 const emit = defineEmits(['onDialogClicked', 'onNewClicked'])

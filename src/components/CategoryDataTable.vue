@@ -29,22 +29,15 @@
                        </template>
                        <template v-slot:actions>
                         <v-spacer></v-spacer>
-                        <v-btn
-                            color="red-darken-1"
-                            variant="text"
-                            @click="onCloseDialog()"
-                        >
-                            Cancel
-                        </v-btn>
-                        <v-btn
-                            color="green-darken-1"
-                            variant="text"
-                            :disabled="!name"
+                        <ActionButtons 
+                            :cancel-title="'Cancel'" 
+                            :confirm-title="'Save'"
                             :loading="loading"
-                            @click="onSaveItem()"
+                            :disable="!name.length"
+                            @close="onCloseDialog()"
+                            @confirm="onSaveItem()" 
                         >
-                            Save
-                        </v-btn>
+                        </ActionButtons>
                        </template>
                     </Dialog>
                 </v-toolbar>
@@ -66,7 +59,8 @@
             </template>
         </v-data-table>
         <Dialog 
-            :dialog-clicked="deleteDialog"
+            :dialog-clicked="deleteDialog" 
+            @on-dialog-clicked="onCloseDialog()" 
             :add-button="false"
         >
             <template v-slot:title>
@@ -77,21 +71,14 @@
             </template>
             <template v-slot:actions>
                 <v-spacer></v-spacer>
-                <v-btn
-                    color="red-darken-1"
-                    variant="text"
-                    @click="onCloseDialog()"
-                >
-                    Cancel
-                </v-btn>
-                <v-btn
-                    color="green-darken-1"
-                    variant="text"
+                <ActionButtons 
+                    :cancel-title="'Cancel'" 
+                    :confirm-title="'Delete'"
                     :loading="loading"
-                    @click="onDeleteItem()"
+                    @close="onCloseDialog()"
+                    @confirm="onDeleteItem()" 
                 >
-                    Delete
-                </v-btn>
+                </ActionButtons>
             </template>
         </Dialog>
     </v-card>
@@ -103,6 +90,7 @@ import { IdAndName } from '@/types/idAndName';
 import { ref, computed, onMounted } from 'vue'
 import CategorySerice from '@/service/CategoryService'
 import Dialog from '@/components/Dialog.vue'
+import ActionButtons from '@/components/ActionButtons.vue'
 
 const headers = [
   { title: "Id", key: "id" },

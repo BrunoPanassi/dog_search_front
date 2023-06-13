@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto my-5" max-width="350">
+    <div>
         <v-data-table
             :headers="headers"
             :items="categories"
@@ -70,14 +70,14 @@
                 />
            </template>
         </Dialog>
-    </v-card>
+    </div>
 </template>
 
 <script lang="ts" setup>
 import { useAdminTableSelectStore } from '@/store/adminTableSelect';
 import { IdAndName } from '@/types/idAndName';
 import { ref, computed, onMounted } from 'vue'
-import CategorySerice from '@/service/CategoryService'
+import CategoryService from '@/service/CategoryService'
 import Dialog from '@/components/Dialog.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DataTableActionButtons from '@/components/DataTableActionButtons.vue'
@@ -89,13 +89,16 @@ const headers = [
 ];
 
 let categories = ref<Array<IdAndName>>([]);
+let selectedCategory = ref<IdAndName>({id: 0, name: ''});
+
 let dialog = ref<boolean>(false);
 let deleteDialog = ref<boolean>(false);
 
 let name = ref<string>('');
 let loading = ref<boolean>(false);
 
-let selectedCategory = ref<IdAndName>({id: 0, name: ''});
+const adminTableSelectStore = useAdminTableSelectStore()
+
 const selectedComputed = computed({
     get: () => selectedCategory.value,
     set: (val) => {
@@ -104,20 +107,18 @@ const selectedComputed = computed({
 })
 const isOnUpdate = computed(() => selectedComputed.value.id !== 0)
 const title = computed(() => !isOnUpdate.value ? 'New Item' : 'Edit Item')
-
-const adminTableSelectStore = useAdminTableSelectStore()
 const tableSelected = computed(() => {
     return capitalize(adminTableSelectStore.whichTableWasSelected)
 })
-const onLoading = () => { loading.value = !loading.value };
 
+const onLoading = () => { loading.value = !loading.value };
 const capitalize = (text: string) => { return `${text.charAt(0).toUpperCase()}${text.slice(1)}` }
 
 const getCategories = async() => { 
     try {
         onLoading()
         categories.value = [];
-        const { data } = await CategorySerice.getAll()
+        const { data } = await CategoryService.getAll()
         categories.value.push(...data)
     } catch (e) {
         console.error(e);
@@ -129,7 +130,7 @@ const getCategories = async() => {
 const onSaveCategory = async () => {
     try {
         onLoading();
-        await CategorySerice.save(selectedComputed.value);
+        await CategoryService.save(selectedComputed.value);
     } catch (e) {
         console.error(e);
     } finally {
@@ -140,7 +141,7 @@ const onSaveCategory = async () => {
 const onUpdateCategory = async () => {
     try {
         onLoading();
-        await CategorySerice.update(selectedComputed.value);
+        await CategoryService.update(selectedComputed.value);
     } catch (e) {
         console.error(e);
     } finally {
@@ -151,7 +152,7 @@ const onUpdateCategory = async () => {
 const onDeleteCategory = async () => {
     try {
         onLoading();
-        await CategorySerice.delete(selectedComputed.value.id)
+        await CategoryService.delete(selectedComputed.value.id)
     } catch (e) {
         console.error(e);
     } finally {
@@ -162,12 +163,6 @@ const onDeleteCategory = async () => {
 const onDeleteDialog = (item: IdAndName) => {
     selectedComputed.value = item
     deleteDialog.value = true
-}
-
-const onNewItem = () => {
-    name.value = ""
-    selectedComputed.value = { id: 0, name: ""}
-    dialog.value = true
 }
 
 const onSaveItem = async () => {
@@ -196,6 +191,12 @@ const onDeleteItem = async () => {
 const onCloseDialog = () => {
     dialog.value = false
     deleteDialog.value = false
+}
+
+const onNewItem = () => {
+    name.value = ""
+    selectedComputed.value = { id: 0, name: ""}
+    dialog.value = true
 }
 
 onMounted(async () => {

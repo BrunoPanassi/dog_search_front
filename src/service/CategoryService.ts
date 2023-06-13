@@ -9,11 +9,11 @@ class CategoryService {
     }
 
     get(id: number) {
-        return AxiosService.get(`${this.path}/${id}`);
+        return AxiosService.get(`${this.path}/${id}`)
     }
 
     save(form: IdAndName) {
-        return AxiosService.post(`${this.path}/save`, form);
+        return AxiosService.post(`${this.path}/save`, form)
     }
 
     update(form: IdAndName) {

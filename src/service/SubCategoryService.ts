@@ -1,3 +1,4 @@
+import { SubCategory } from "@/types/subCategory";
 import AxiosService from "./AxiosService";
 
 class SubCategoryService {
@@ -15,6 +16,17 @@ class SubCategoryService {
         return AxiosService.get(`${this.path}/category?name=${name}`)
     }
 
+    save(form: SubCategory) {
+        return AxiosService.post(`${this.path}/save`, form)
+    }
+
+    update(form: SubCategory) {
+        return AxiosService.put(`${this.path}/save/${form.id}`, form)
+    }
+
+    delete(id: number) {
+        return AxiosService.delete(`${this.path}/${id}`)
+    }
     
 }
 

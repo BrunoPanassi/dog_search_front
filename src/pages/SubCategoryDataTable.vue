@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto my-5" max-width="350">
+    <div>
         <v-data-table
             :headers="headers"
             :items="subCategories"
@@ -7,8 +7,7 @@
         >
             <template v-slot:top>
                 <v-toolbar flat>
-                    <v-toolbar-title>{{ props.tableSelected }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
+                    <v-toolbar-title class="text-h6">{{ props.tableSelected }}</v-toolbar-title>
                     <Dialog 
                         :dialog-clicked="dialog"
                         :add-button="true" 
@@ -20,17 +19,18 @@
                         </template>
                         <template v-slot:content>
                             <v-select
+                                v-model="selectedCategoryId"
                                 label="Categoria"
                                 :items="categories"
                                 item-title="name"
                                 item-value="id"
-                                return-object
                             >
                             </v-select>
                             <v-text-field 
                             label="Nome"
                             hide-details="auto"
                             density="compact"
+                            :disabled="!selectedCategoryId"
                             v-model="name"
 
                             ></v-text-field>
@@ -41,7 +41,7 @@
                             :cancel-title="'Cancel'" 
                             :confirm-title="'Save'"
                             :loading="loading"
-                            :disable="!name.length"
+                            :disable="!name.length && !selectedCategoryId"
                             @close="onCloseDialog()"
                             @confirm="onSaveItem()" 
                         />
@@ -50,7 +50,7 @@
                 </v-toolbar>
             </template>
         </v-data-table>
-    </v-card>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -59,18 +59,20 @@ import SubCategoryService from '@/service/SubCategoryService';
 import ActionButtons from '@/components/ActionButtons.vue'
 import Dialog from '@/components/Dialog.vue'
 import { IdAndName } from '@/types/idAndName';
-import { SubCategory } from '@/types/subCategory';
+import { SubCategory, SubCategorySaveDTO } from '@/types/subCategory';
 import { ref, onMounted, computed } from 'vue'
 
 const props = defineProps({
     tableSelected: String
 })
 
-let categories = ref<Array<IdAndName>>([]);
-let selectedCategory = ref<IdAndName>({id: 0, name: ''});
-let name = ref<string>('');
+const onResetSubCategory = () => { return { id: 0, category: { id: 0, name: '' }, name: '' }}
+const onResetSubCategorySaveForm = () => { return { name: '', categoryId: 0}}
 
-const onResetSubCategory = () => { return {id: 0, category: { id: 0, name: '' }, name: ''}}
+let categories = ref<Array<IdAndName>>([]);
+let subCategorySaveForm = ref<SubCategorySaveDTO>(onResetSubCategorySaveForm());
+let name = ref<string>('');
+let selectedCategoryId = ref<number>();
 
 let selectedSubCategory = ref<SubCategory>(onResetSubCategory());
 const selectedComputed = computed({
@@ -123,14 +125,14 @@ const getCategories = async() => {
 }
 
 const onSetSubCategoryAfterSave = () => {
-    selectedComputed.value.name = name.value;
-    selectedComputed.value.category = selectedCategory.value;
+    subCategorySaveForm.value.name = name.value;
+    if(selectedCategoryId.value) subCategorySaveForm.value.categoryId = selectedCategoryId.value;
 }
 
 const onSaveSubCategory = async () => {
     try {
         onLoading();
-        await SubCategoryService.save(selectedComputed.value);
+        await SubCategoryService.save(subCategorySaveForm.value);
     } catch (e) {
         console.error(e);
     } finally {
@@ -157,7 +159,7 @@ const onSaveItem = async () => {
         await onSaveSubCategory()
     }
     onCloseDialog()
-    await getCategories()
+    await getSubCategories()
 }
 
 const onCloseDialog = () => {
@@ -169,6 +171,7 @@ const onNewItem = async () => {
     await getCategories()
     name.value = ""
     selectedComputed.value = onResetSubCategory()
+    subCategorySaveForm.value = onResetSubCategorySaveForm()
     dialog.value = true
 }
 

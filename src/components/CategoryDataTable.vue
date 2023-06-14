@@ -7,8 +7,7 @@
         >
             <template v-slot:top>
                 <v-toolbar flat>
-                    <v-toolbar-title>{{ tableSelected }}</v-toolbar-title>
-                    <v-spacer></v-spacer>
+                    <v-toolbar-title>{{ props.tableSelected }}</v-toolbar-title>
                     <Dialog 
                         :dialog-clicked="dialog"
                         :add-button="true" 
@@ -81,6 +80,10 @@ import CategoryService from '@/service/CategoryService'
 import Dialog from '@/components/Dialog.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DataTableActionButtons from '@/components/DataTableActionButtons.vue'
+
+const props = defineProps({
+    tableSelected: String
+})
 
 const headers = [
   { title: "Id", key: "id" },

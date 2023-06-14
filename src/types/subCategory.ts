@@ -6,4 +6,10 @@ interface SubCategory {
     category: IdAndName
 }
 
+interface SubCategorySaveDTO {
+    name: string
+    categoryId: number
+}
+
 export type { SubCategory }
+export type { SubCategorySaveDTO }

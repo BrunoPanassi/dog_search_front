@@ -1,4 +1,4 @@
-import { SubCategory } from "@/types/subCategory";
+import { SubCategory, SubCategorySaveDTO } from "@/types/subCategory";
 import AxiosService from "./AxiosService";
 
 class SubCategoryService {
@@ -16,7 +16,7 @@ class SubCategoryService {
         return AxiosService.get(`${this.path}/category?name=${name}`)
     }
 
-    save(form: SubCategory) {
+    save(form: SubCategorySaveDTO) {
         return AxiosService.post(`${this.path}/save`, form)
     }
 

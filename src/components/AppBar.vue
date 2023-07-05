@@ -19,12 +19,15 @@
                 Criar Nova Conta
             </template>
             <template v-slot:content>
-                <v-form v-model="valid">
+                <v-form v-model="onValid" ref="form" validate-on="blur">
                     <v-row v-for="(prop, i) in textFieldLabels">
                         <v-select v-if="prop.type == 'select'"
+                            :loading="loading"
+                            :clearable="true"
                             :label="prop.label"
                             :items="prop.items"
                             v-model="prop.model"
+                            :rules="prop.validation"
                             :prepend-inner-icon="prop.icon"
                             :item-title="prop.itemTitle"
                             :item-value="prop.itemValue"
@@ -32,6 +35,7 @@
                         </v-select>
                         <v-col v-else :key="i">
                             <v-text-field 
+                                validate-on="blur"
                                 :label="prop.label"
                                 hide-details="auto"
                                 density="compact"
@@ -39,9 +43,10 @@
                                 :placeholder="prop.placeholder"
                                 :prepend-inner-icon="prop.icon"
                                 :counter="prop.counter"
-                                :rules="[prop.validation]"
+                                :rules="prop.validation"
                                 :type="prop.type"
                                 v-model="prop.model"
+                                @update:model-value="updateModelValue"
                                 ></v-text-field>
                         </v-col>
                     </v-row>
@@ -53,7 +58,7 @@
                     :cancel-title="'Fechar'" 
                     :confirm-title="'Salvar'"
                     :loading="loading"
-                    :disable="!valid"
+                    :disable="!onValid"
                     @close="onCloseDialog()"
                     @confirm="onSaveNewAccount()" 
                 />
@@ -84,13 +89,13 @@ const handleClickDrawer = () => {
 }
 
 const requiredField = (text: string) => !!text || "O campo é obrigatório"
-const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
-const brPhoneNumberRegex = /(\(\d{2}\))\s(\d{5})\-(\d{4})/g
+const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+const brPhoneNumberRegex = /(\(\d{2}\))\s(\d{5})\-(\d{4})/
 const validEmail = (text: string) => emailRegex.test(text) || "Formato inválido de e-mail"
 const validPhoneNumber = (text: string) => brPhoneNumberRegex.test(text) || "Formato inválido de telefone"
 
 let loading = ref<boolean>(false);
-let valid = ref<boolean>(false);
+let onValid = ref<boolean>(false);
 let name = ref<string>("");
 let email = ref<string>("");
 let password = ref<string>("");
@@ -101,6 +106,8 @@ let state = ref();
 let countryStates = ref<Array<CountryStates>>([]);
 let countryCities = ref();
 
+const form = ref();
+
 const textFieldLabels = ref([
     {
         label: "Nome",
@@ -108,7 +115,7 @@ const textFieldLabels = ref([
         type: "input",
         counter: 50,
         icon: "mdi-account",
-        validation: requiredField
+        validation: [requiredField]
     },
     {
         label: "E-mail",
@@ -117,7 +124,7 @@ const textFieldLabels = ref([
         counter: 80,
         icon: "mdi-email",
         placeholder: "nome@email.com",
-        validation: validEmail
+        validation: [requiredField, validEmail]
     },
     {
         label: "Senha",
@@ -125,7 +132,7 @@ const textFieldLabels = ref([
         type: "password",
         icon: "mdi-form-textbox-password",
         counter: 30,
-        validation: requiredField
+        validation: [requiredField]
     },
     {
         label: "Estado",
@@ -136,7 +143,7 @@ const textFieldLabels = ref([
         type: "select",
         counter: 20,
         icon: "mdi-city-variant",
-        validation: requiredField
+        validation: [requiredField]
     },
     {
         label: "Cidade",
@@ -147,7 +154,7 @@ const textFieldLabels = ref([
         type: "select",
         counter: 20,
         icon: "mdi-city",
-        validation: requiredField
+        validation: [requiredField]
     },
     {
         label: "Bairro",
@@ -155,7 +162,7 @@ const textFieldLabels = ref([
         type: "input",
         counter: 30,
         icon: "mdi-home-group",
-        validation: requiredField
+        validation: [requiredField]
     },
     {
         label: "Telefone",
@@ -164,7 +171,7 @@ const textFieldLabels = ref([
         counter: 15,
         icon: "mdi-phone",
         placeholder: "(99) 99999-9999",
-        validation: validPhoneNumber
+        validation: [requiredField, validPhoneNumber]
     }
 ])
 
@@ -179,9 +186,11 @@ const onGetCityStates = async () => {
 }
 
 const onGetCityByState = async () => {
+    onLoading()
     const response = await fetch(`http://servicodados.ibge.gov.br/api/v1/localidades/estados/${state.value}/municipios`)
     const cities = await response.json();
     countryCities.value = cities;
+    onLoading()
 }
 
 const onLoading = () => loading.value = !loading.value
@@ -189,7 +198,8 @@ const onLoading = () => loading.value = !loading.value
 const onSaveNewAccount = async () => {
     try {
         onLoading();
-        if (valid.value) {
+        const { valid } = await form.value.validate()
+        if (valid && onValid) {
             alert("Its Valid")
         } else {
             alert("Its not valid")
@@ -200,6 +210,8 @@ const onSaveNewAccount = async () => {
         onLoading();
     }
 }
+
+const updateModelValue = (text: string) => console.log(text)
 
 watch(state, (currState, prevState) => {
     console.log(currState)

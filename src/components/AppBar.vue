@@ -75,6 +75,7 @@ import UserMenu from '@/components/UserMenu.vue'
 import Dialog from '@/components/Dialog.vue'
 import { ref, onMounted, watch } from 'vue';
 import ActionButtons from '@/components/ActionButtons.vue'
+import AuthenticationService from '@/service/AuthenticationService';
 interface CountryStates {
     id: number
     sigla: string
@@ -87,12 +88,6 @@ const appBarStore = useAppBarStore();
 const handleClickDrawer = () => {
     drawerStore.drawerClicked()
 }
-
-const requiredField = (text: string) => !!text || "O campo é obrigatório"
-const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-const brPhoneNumberRegex = /(\(\d{2}\))\s(\d{5})\-(\d{4})/
-const validEmail = (text: string) => emailRegex.test(text) || "Formato inválido de e-mail"
-const validPhoneNumber = (text: string) => brPhoneNumberRegex.test(text) || "Formato inválido de telefone"
 
 let loading = ref<boolean>(false);
 let onValid = ref<boolean>(false);
@@ -115,7 +110,7 @@ const textFieldLabels = ref([
         type: "input",
         counter: 50,
         icon: "mdi-account",
-        validation: [requiredField]
+        validation: [AuthenticationService.requiredField]
     },
     {
         label: "E-mail",
@@ -124,7 +119,7 @@ const textFieldLabels = ref([
         counter: 80,
         icon: "mdi-email",
         placeholder: "nome@email.com",
-        validation: [requiredField, validEmail]
+        validation: [AuthenticationService.requiredField, AuthenticationService.isAValidEmail]
     },
     {
         label: "Senha",
@@ -132,7 +127,7 @@ const textFieldLabels = ref([
         type: "password",
         icon: "mdi-form-textbox-password",
         counter: 30,
-        validation: [requiredField]
+        validation: [AuthenticationService.requiredField]
     },
     {
         label: "Estado",
@@ -143,7 +138,7 @@ const textFieldLabels = ref([
         type: "select",
         counter: 20,
         icon: "mdi-city-variant",
-        validation: [requiredField]
+        validation: [AuthenticationService.requiredField]
     },
     {
         label: "Cidade",
@@ -154,7 +149,7 @@ const textFieldLabels = ref([
         type: "select",
         counter: 20,
         icon: "mdi-city",
-        validation: [requiredField]
+        validation: [AuthenticationService.requiredField]
     },
     {
         label: "Bairro",
@@ -162,7 +157,7 @@ const textFieldLabels = ref([
         type: "input",
         counter: 30,
         icon: "mdi-home-group",
-        validation: [requiredField]
+        validation: [AuthenticationService.requiredField]
     },
     {
         label: "Telefone",
@@ -171,7 +166,7 @@ const textFieldLabels = ref([
         counter: 15,
         icon: "mdi-phone",
         placeholder: "(99) 99999-9999",
-        validation: [requiredField, validPhoneNumber]
+        validation: [AuthenticationService.requiredField, AuthenticationService.isAValidPhoneNumber]
     }
 ])
 

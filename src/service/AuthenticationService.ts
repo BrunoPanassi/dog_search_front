@@ -3,8 +3,8 @@ import { Authentication } from '@/types/authentication';
 import AxiosService from "./AxiosService";
 
 class AuthenticationService {
-    emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    brPhoneNumberRegex = /(\(\d{2}\))\s(\d{5})\-(\d{4})/;
+    public static emailRegex: RegExp = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    public static brPhoneNumberRegex = /(\(\d{2}\))\s(\d{5})\-(\d{4})/;
 
     path = '/auth';
     
@@ -17,11 +17,11 @@ class AuthenticationService {
     }
 
     isAValidEmail(text: string) {
-        return this.emailRegex.test(text) || "Formato inválido de email"
+        return AuthenticationService.emailRegex.test(text) || "Formato inválido de email"
     }
 
     isAValidPhoneNumber(text: string) {
-        return this.brPhoneNumberRegex.test(text) || "Formato inválido de telefone"
+        return AuthenticationService.brPhoneNumberRegex.test(text) || "Formato inválido de telefone"
     }
 
     requiredField(text: string) {

@@ -46,7 +46,6 @@
                                 :rules="prop.validation"
                                 :type="prop.type"
                                 v-model="prop.model"
-                                @update:model-value="updateModelValue"
                                 ></v-text-field>
                         </v-col>
                     </v-row>
@@ -73,9 +72,11 @@ import { useDrawerStore } from '@/store/drawer';
 import { useAppBarStore } from '@/store/appBar';
 import UserMenu from '@/components/UserMenu.vue'
 import Dialog from '@/components/Dialog.vue'
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed, ComputedRef } from 'vue';
 import ActionButtons from '@/components/ActionButtons.vue'
 import AuthenticationService from '@/service/AuthenticationService';
+import { Register } from '@/types/register';
+import axios from 'axios';
 interface CountryStates {
     id: number
     sigla: string
@@ -190,12 +191,28 @@ const onGetCityByState = async () => {
 
 const onLoading = () => loading.value = !loading.value
 
+const registerFieldValues: ComputedRef<Register> = computed(() => {
+    return {
+        name: name.value,
+        city: city.value,
+        neighbourhood: neighbourhood.value,
+        phoneNumber: phoneNumber.value,
+        password: password.value,
+        email: email.value
+    }
+})
+
 const onSaveNewAccount = async () => {
     try {
         onLoading();
         const { valid } = await form.value.validate()
         if (valid && onValid) {
-            alert("Its Valid")
+            try {
+                const { data } = await AuthenticationService.register(registerFieldValues.value);
+                if (data) localStorage.setItem("token", data);
+            } catch (error) {
+                axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
+            }
         } else {
             alert("Its not valid")
         }
@@ -206,10 +223,7 @@ const onSaveNewAccount = async () => {
     }
 }
 
-const updateModelValue = (text: string) => console.log(text)
-
 watch(state, (currState, prevState) => {
-    console.log(currState)
     if (currState) {
         onGetCityByState();
     }

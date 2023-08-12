@@ -44,7 +44,7 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn>Deslogar</v-btn>
-                <v-btn>Logar</v-btn>
+                <v-btn @click="onAuthenticate">Logar</v-btn>
             </v-card-actions>
         </v-card>
 
@@ -54,8 +54,9 @@
 
 <script lang="ts" setup>
 
-const emit = defineEmits(["openNewAccount"]);
+const emit = defineEmits(["openNewAccount", "onAuthenticate"]);
 
+const onAuthenticate = () => emit("onAuthenticate");
 
 const accountMenuItens = [
     {

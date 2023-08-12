@@ -8,11 +8,18 @@
             {{ appBarStore.getTitle }}
         </v-app-bar-title>
         <v-spacer></v-spacer>
-        <UserMenu @open-new-account="onNewAccount()"/>
+        <UserMenu 
+            @open-new-account="onNewAccount()" 
+            @on-authenticate="onAuthenticate()"
+        />
 
         <RegisterDialog 
-            :new-account-dialog="newAccountDialog" 
-            @on-close-dialog="onCloseDialog"
+            :new-account-dialog="registerDialog" 
+            @on-close-dialog="onCloseRegisterDialog"
+        />
+        <AuthenticationDialog
+            :authentication-dialog="authenticationDialog"
+            @on-close-dialog="onCloseAuthenticationDialog"
         />
         
     </v-app-bar>
@@ -24,6 +31,7 @@ import { useAppBarStore } from '@/store/appBar';
 import UserMenu from '@/components/UserMenu.vue'
 import { ref } from 'vue';
 import RegisterDialog from '@/pages/RegisterDialog.vue';
+import AuthenticationDialog from '@/pages/AuthenticationDialog.vue';
 
 const drawerStore = useDrawerStore();
 const appBarStore = useAppBarStore();
@@ -32,8 +40,12 @@ const handleClickDrawer = () => {
     drawerStore.drawerClicked()
 }
 
-let newAccountDialog = ref<boolean>(false);
-const onNewAccount = () => { newAccountDialog.value = true }
-const onCloseDialog = () => { newAccountDialog.value = false }
+let registerDialog = ref<boolean>(false);
+const onNewAccount = () => { registerDialog.value = true }
+const onCloseRegisterDialog = () => { registerDialog.value = false }
+
+let authenticationDialog = ref<boolean>(false);
+const onAuthenticate = () => { authenticationDialog.value = true }
+const onCloseAuthenticationDialog = () => { authenticationDialog.value = false }
 
 </script>

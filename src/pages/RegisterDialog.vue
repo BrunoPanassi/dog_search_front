@@ -61,6 +61,7 @@ import AuthenticationService from '@/service/AuthenticationService';
 import { Register } from '@/types/register';
 import axios from 'axios';
 import ActionButtons from '@/components/ActionButtons.vue';
+import TokenService from '@/service/TokenService';
 
 interface CountryStates {
     id: number
@@ -74,11 +75,6 @@ const props = defineProps({
 
 const { newAccountDialog } = toRefs(props);
 const emit = defineEmits(['onCloseDialog']);
-
-const onCloseDialog = () => { 
-    newAccountDialog.value = false 
-    emit('onCloseDialog')
-}
 const form = ref();
 const onLoading = () => loading.value = !loading.value
 
@@ -187,24 +183,27 @@ const registerFieldValues: ComputedRef<Register> = computed(() => {
 })
 
 const onSaveNewAccount = async () => {
-    try {
-        onLoading();
-        const { valid } = await form.value.validate()
-        if (valid && onValid) {
-            try {
-                const { data } = await AuthenticationService.register(registerFieldValues.value);
-                if (data) localStorage.setItem("token", data);
-            } catch (error) {
-                axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
-            }
-        } else {
-            alert("Its not valid")
+    const { valid } = await form.value.validate()
+    if (valid && onValid) {
+        try {
+            onLoading()
+            const { data } = await AuthenticationService.register(registerFieldValues.value);
+            if (data) TokenService.setToken(data);
+            alert("Conta criada com sucesso!")
+            onCloseDialog()
+        } catch (error) {
+            axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
+        } finally {
+            onLoading()
         }
-    } catch (e) {
-        console.error(e)
-    } finally {
-        onLoading();
+    } else {
+        alert("Campos não estão válidos, confira novamente.")
     }
+}
+
+const onCloseDialog = () => { 
+    newAccountDialog.value = false 
+    emit('onCloseDialog')
 }
 
 watch(state, (currState) => {

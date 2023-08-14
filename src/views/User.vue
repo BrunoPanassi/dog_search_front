@@ -1,13 +1,13 @@
 <template>
     <v-layout>
         <AppBar/>
-        <AdminNavigationDrawer/>
+        <UserNavigationDrawer/>
         <UserView/>
     </v-layout>
 </template>
 
 <script lang="ts" setup>
 import AppBar from '@/components/AppBar.vue';
-import AdminNavigationDrawer from '@/components/AdminNavigationDrawer.vue'
+import UserNavigationDrawer from '@/components/UserNavigationDrawer.vue'
 import UserView from '@/views/UserView.vue'
 </script>

@@ -50,6 +50,9 @@ import { Authentication } from '@/types/authentication';
 import ActionButtons from '@/components/ActionButtons.vue';
 import TokenService from '@/service/TokenService';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
     authenticationDialog: {type: Boolean, required: true}
@@ -100,6 +103,7 @@ const onAuthenticate = async () => {
             if (data) TokenService.setToken(data);
             alert("Logado")
             onCloseDialog()
+            router.push('user');
         } catch (error) {
             axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
         } finally {

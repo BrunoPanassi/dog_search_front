@@ -1,4 +1,5 @@
 interface AnnouncementSaveDTO {
+    id: number,
     title: string,
     text: string,
     personId: number,

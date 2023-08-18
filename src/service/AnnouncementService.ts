@@ -1,5 +1,6 @@
 import AxiosService from "./AxiosService";
 import { CityAndSubCategory } from "@/types/announcement.cityAndSubCategory";
+import { AnnouncementSaveDTO } from "@/types/announcement";
 import TokenService from "./TokenService";
 
 class AnnouncementService {
@@ -13,13 +14,13 @@ class AnnouncementService {
         return AxiosService.get(`${this.path}/${id}`);
     }
 
-    // save(form: IdAndName) {
-    //     return AxiosService.post(`${this.path}/save`, form)
-    // }
+    save(form: AnnouncementSaveDTO) {
+        return AxiosService.post(`${this.path}/save`, form)
+    }
 
-    // update(form: IdAndName) {
-    //     return AxiosService.put(`${this.path}/save/${form.id}`, form)
-    // }
+    update(form: AnnouncementSaveDTO) {
+        return AxiosService.put(`${this.path}/save/${form.id}`, form)
+    }
 
     delete(id: number) {
         return AxiosService.delete(`${this.path}/${id}`)

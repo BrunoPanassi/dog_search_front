@@ -19,24 +19,30 @@
                             {{ title }}
                        </template>
                        <template v-slot:content>
-                        <div v-for="(item, i) in itens" :key="i">
-                            <v-text-field 
-                                v-if="item.type == 'text'"
-                                :label="item.title"
-                                hide-details="auto"
-                                density="compact"
-                                v-model="item.data"
-                            ></v-text-field>
-                            <v-select
-                                v-else
-                                :label="item.title"
-                                :items="item.items"
-                                :item-title="item.itemText"
-                                :item-value="item.itemValue"
-                                v-model="item.data"
-                            >
-                            </v-select>
-                        </div>
+                        <v-form v-model="onValid" ref="form" validate-on="blur">
+                            <v-row v-for="(item, i) in itens" :key="i">
+                                <v-text-field 
+                                    v-if="item.type == 'text'"
+                                    :label="item.title"
+                                    hide-details="auto"
+                                    density="compact"
+                                    v-model="item.data"
+                                    :rules="item.validation"
+                                ></v-text-field>
+                                <v-select
+                                    v-else
+                                    :label="item.title"
+                                    :items="item.items"
+                                    :item-title="item.itemText"
+                                    :item-value="item.itemValue"
+                                    :loading="item.loading"
+                                    v-model="item.data"
+                                    :rules="item.validation"
+                                    @update:model-value="item.onChange"
+                                >
+                                </v-select>
+                            </v-row>
+                        </v-form>
                        </template>
                        <template v-slot:actions>
                         <v-spacer></v-spacer>
@@ -44,7 +50,7 @@
                             :cancel-title="'Cancel'" 
                             :confirm-title="'Save'"
                             :loading="loading"
-                            :disable="!isAllItensFilled"
+                            :disable="!onValid"
                             @close="onCloseDialog()"
                             @confirm="onSaveItem()" 
                         />
@@ -74,51 +80,78 @@ import Dialog from '@/components/Dialog.vue'
 import DataTableActionButtons from '@/components/DataTableActionButtons.vue'
 import CategoryService from '@/service/CategoryService';
 import SubCategoryService from '@/service/SubCategoryService'
+import { useUserStore } from '@/store/userStore';
+import AuthenticationService from '@/service/AuthenticationService';
 
 interface Item {
-    title: string,
-    data: string|number,
-    items?: ComputedRef<Array<IdAndName>>,
-    itemText?: string,
-    itemValue?: string,
+    title: string
+    data: string|number
+    items?: ComputedRef<Array<IdAndName>>
+    itemText?: string
+    itemValue?: string
+    onChange?: Function
+    loading?: boolean
+    validation: Array<(text: string) => string | true>
     type: string
 }
+
+let onValid = ref<boolean>(false);
+const form = ref();
 
 let loading = ref<boolean>(false);
 let subCategoryLoading = false;
 const onLoading = () => { loading.value = !loading.value };
+const userStore = useUserStore();
 
 let announcements = ref<Array<Announcement>>([]);
 const resetedAnnouncement = {
     id: 0,
     title: "",
     text: "",
-    personId: 0, // TODO: Buscar person da pessoa logada
+    personId: 0,
     subCategoryId: 0,
     images: [""]
 }
 let selectedAnnouncement = ref<AnnouncementSaveDTO>(resetedAnnouncement)
+const selectedAnnouncementComputed = computed({
+    get: () => selectedAnnouncement.value,
+    set: (val) => {
+        selectedAnnouncement.value = val
+    }
+})
 
 let title = ref<string>("");
 let description = ref<string>("")
 let category = ref<string>("");
-let subCategory = ref<string>("");
+let subCategory = ref<number>(0);
 let images = ref<Array<string>>([""])
 
 let categories = ref<Array<IdAndName>>([]);
-let subCategories = ref<Array<string>>([]);
+let subCategories = ref<Array<IdAndName>>([]);
 const categoriesComputed = computed(() => categories.value)
+const subCategoriesComputed = computed(() => subCategories.value)
 
-const itens  = ref<Array<Item>>([
+const onSelectCategory = async(categorySelected: string) => {
+    category.value = categorySelected
+    await getSubCategories()
+}
+
+const onSelectSubCategory = async(subCategorySelected: number) => {
+    subCategory.value = subCategorySelected
+}
+
+const itens = ref<Array<Item>>([
     {
         title: "Título",
         data: "",
-        type: "text"
+        type: "text",
+        validation: [AuthenticationService.requiredField]
     },
     {
         title: "Descrição",
         data: "",
-        type: "text"
+        type: "text",
+        validation: [AuthenticationService.requiredField]
     },
     {
         title: "Categoria",
@@ -126,23 +159,48 @@ const itens  = ref<Array<Item>>([
         type: "select",
         items: categoriesComputed,
         itemText: "name",
-        itemValue: "id"
+        itemValue: "name",
+        onChange: onSelectCategory,
+        validation: [AuthenticationService.requiredField]
     },
     {
         title: "Sub-Categoria",
-        data: selectedAnnouncement.value.subCategoryId,
-        type: "select"
+        data: 0,
+        type: "select",
+        items: subCategoriesComputed,
+        itemText: "name",
+        itemValue: "id",
+        onChange: onSelectSubCategory,
+        loading: subCategoryLoading,
+        validation: [AuthenticationService.requiredField]
     }
 ])
 
-const isAllItensFilled = computed(() => itens.value.filter(i => i.data))
-
-const selectedAnnouncementComputed = computed({
-    get: () => selectedAnnouncement.value,
-    set: (val) => {
-        selectedAnnouncement.value = val
+const itensValues = computed(() => {
+    return {
+        id: 0,
+        title: itens.value.find(i => i.title == "Título")?.data,
+        text: itens.value.find(i => i.title == "Descrição")?.data,
+        subCategoryId: subCategory.value,
+        images: [""]
     }
 })
+
+const itensForm = () => {
+    const title = itensValues.value.title ?? ""
+    const text = itensValues.value.text ?? ""
+    const personId = userStore.userStored.id
+    const subCategory = itensValues.value.subCategoryId
+    const images = [""]
+    return {
+        id: 0,
+        title: title.toString(),
+        text: text.toString(),
+        personId: personId,
+        subCategoryId: subCategory,
+        images: images
+    }
+}
 
 let dialog = ref<boolean>(false);
 let deleteDialog = ref<boolean>(false);
@@ -165,21 +223,16 @@ const onNewItem = async () => {
 }
 
 const onSaveItem = async () => {
-    // selectedComputed.value.name = name.value;
-    // if (isOnUpdate.value) {
-    //     await onUpdateCategory();
-    // } else {
-    //     await onSaveCategory();
-    // }
-    // onCloseDialog();
-    // await getCategories();
+    onLoading();
+    await onSaveAnnouncement();
+    onLoading();
 }
 
 const resetValues = () => {
     title.value = ""
     description.value = ""
     category.value = ""
-    subCategory.value = ""
+    subCategory.value = 0
 }
 
 const getAnnouncements = async() => {
@@ -200,7 +253,7 @@ const getAnnouncements = async() => {
 const onSaveAnnouncement = async () => {
     try {
         onLoading();
-        await AnnouncementService.save(selectedAnnouncementComputed.value);
+        await AnnouncementService.save(itensForm());
     } catch (e) {
         console.error(e);
     } finally {
@@ -221,9 +274,7 @@ const getSubCategories = async () => {
   try {
     subCategoryLoading = true;
     let { data } = await SubCategoryService.getByCategory(category.value);
-    data = data.map((c:IdAndName) => c.name)
-    subCategories.value.splice(0);
-    subCategories.value.push(...data);
+    subCategories.value = data;
   } catch (e) {
     console.error(e);
   } finally {

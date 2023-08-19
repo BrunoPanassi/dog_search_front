@@ -15,7 +15,11 @@ class AnnouncementService {
     }
 
     save(form: AnnouncementSaveDTO) {
-        return AxiosService.post(`${this.path}/save`, form)
+        return AxiosService.post(`${this.path}/save`, form, {
+            headers: {
+                "Authorization": `Bearer ${TokenService.getToken()}`
+            }
+        })
     }
 
     update(form: AnnouncementSaveDTO) {

@@ -8,10 +8,12 @@ interface AnnouncementSaveDTO {
 }
 
 interface Announcement {
+    id: number,
     title: string,
     text: string,
     person: string,
-    subCategory: string
+    category: string
+    subCategoryId: number
 }
 
 export type { AnnouncementSaveDTO }

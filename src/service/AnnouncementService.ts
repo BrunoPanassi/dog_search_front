@@ -23,7 +23,11 @@ class AnnouncementService {
     }
 
     update(form: AnnouncementSaveDTO) {
-        return AxiosService.put(`${this.path}/save/${form.id}`, form)
+        return AxiosService.put(`${this.path}/save/${form.id}`, form, {
+            headers: {
+                "Authorization": `Bearer ${TokenService.getToken()}`
+            }
+        })
     }
 
     delete(id: number) {

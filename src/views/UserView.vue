@@ -1,6 +1,6 @@
 <template>
     <v-main>
-        <v-card class="mx-auto my-5" max-width="350">
+        <v-card class="mx-auto my-5" max-width="450">
             <v-data-table
             :headers="headers"
             :items="announcements"
@@ -37,6 +37,7 @@
                                     :item-value="item.itemValue"
                                     :loading="item.loading"
                                     v-model="item.data"
+                                    :disabled="item.disable"
                                     :rules="item.validation"
                                     @update:model-value="item.onChange"
                                 >
@@ -59,12 +60,34 @@
                 </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
-                <!-- <DataTableActionButtons 
+                <DataTableActionButtons 
                     @edit="onEditItem(item.raw)" 
                     @delete="onDeleteDialog(item.raw)" 
-                /> -->
+                />
             </template>
         </v-data-table>
+        <Dialog 
+            :dialog-clicked="deleteDialog" 
+            @on-dialog-clicked="onCloseDialog()" 
+            :add-button="false"
+        >
+            <template v-slot:title>
+                Confirmar
+            </template>
+            <template v-slot:content>
+                <p class="text-h6 text-center">Deseja excluir o registro?</p>
+            </template>
+            <template v-slot:actions>
+                <v-spacer></v-spacer>
+                <ActionButtons 
+                    :cancel-title="'Cancel'" 
+                    :confirm-title="'Delete'"
+                    :loading="loading"
+                    @close="onCloseDialog()"
+                    @confirm="onDeleteItem()" 
+                />
+           </template>
+        </Dialog>
         </v-card>
     </v-main>
 </template>
@@ -72,7 +95,7 @@
 <script lang="ts" setup>
 import AnnouncementService from '@/service/AnnouncementService';
 import { ref, computed, onMounted, ComputedRef } from 'vue';
-import { Announcement, AnnouncementSaveDTO } from '@/types/announcement'
+import { Announcement } from '@/types/announcement'
 import type { IdAndName } from '@/types/idAndName';
 import TokenService from '@/service/TokenService';
 import ActionButtons from '@/components/ActionButtons.vue'
@@ -86,12 +109,14 @@ import AuthenticationService from '@/service/AuthenticationService';
 interface Item {
     title: string
     data: string|number
+    column: string
     items?: ComputedRef<Array<IdAndName>>
     itemText?: string
     itemValue?: string
     onChange?: Function
     loading?: boolean
     validation: Array<(text: string) => string | true>
+    disable: boolean | ComputedRef<boolean>
     type: string
 }
 
@@ -104,26 +129,11 @@ const onLoading = () => { loading.value = !loading.value };
 const userStore = useUserStore();
 
 let announcements = ref<Array<Announcement>>([]);
-const resetedAnnouncement = {
-    id: 0,
-    title: "",
-    text: "",
-    personId: 0,
-    subCategoryId: 0,
-    images: [""]
-}
-let selectedAnnouncement = ref<AnnouncementSaveDTO>(resetedAnnouncement)
-const selectedAnnouncementComputed = computed({
-    get: () => selectedAnnouncement.value,
-    set: (val) => {
-        selectedAnnouncement.value = val
-    }
-})
 
+let id = ref<number>(0);
 let title = ref<string>("");
 let description = ref<string>("")
 let category = ref<string>("");
-let subCategory = ref<number>(0);
 let images = ref<Array<string>>([""])
 
 let categories = ref<Array<IdAndName>>([]);
@@ -132,56 +142,71 @@ const categoriesComputed = computed(() => categories.value)
 const subCategoriesComputed = computed(() => subCategories.value)
 
 const onSelectCategory = async(categorySelected: string) => {
-    category.value = categorySelected
+    onUpdateCategory(categorySelected)
+    onResetSubCategory()
     await getSubCategories()
 }
 
-const onSelectSubCategory = async(subCategorySelected: number) => {
-    subCategory.value = subCategorySelected
+const onUpdateCategory = (categorySelected: string) => {
+    category.value = categorySelected;
 }
+
+const onResetSubCategory = () => {
+    itens.value.forEach(i => {
+         if (i.column == "subCategoryId") i.data = 0;
+    })
+}
+
+const isCategorySelected = computed<boolean>(() => category.value.length == 0);
 
 const itens = ref<Array<Item>>([
     {
         title: "Título",
         data: "",
+        column: "title",
         type: "text",
+        disable: false,
         validation: [AuthenticationService.requiredField]
     },
     {
         title: "Descrição",
         data: "",
+        column: "text",
         type: "text",
+        disable: false,
         validation: [AuthenticationService.requiredField]
     },
     {
         title: "Categoria",
-        data: 0,
+        data: "",
+        column: "category",
         type: "select",
         items: categoriesComputed,
         itemText: "name",
         itemValue: "name",
         onChange: onSelectCategory,
+        disable: false,
         validation: [AuthenticationService.requiredField]
     },
     {
         title: "Sub-Categoria",
         data: 0,
+        column: "subCategoryId",
         type: "select",
         items: subCategoriesComputed,
         itemText: "name",
         itemValue: "id",
-        onChange: onSelectSubCategory,
         loading: subCategoryLoading,
+        disable: isCategorySelected,
         validation: [AuthenticationService.requiredField]
     }
 ])
 
 const itensValues = computed(() => {
     return {
-        id: 0,
-        title: itens.value.find(i => i.title == "Título")?.data,
-        text: itens.value.find(i => i.title == "Descrição")?.data,
-        subCategoryId: subCategory.value,
+        title: itens.value.find(i => i.column == "title")?.data,
+        text: itens.value.find(i => i.column == "text")?.data,
+        subCategoryId: itens.value.find(i => i.column == "subCategoryId")?.data,
         images: [""]
     }
 })
@@ -190,10 +215,10 @@ const itensForm = () => {
     const title = itensValues.value.title ?? ""
     const text = itensValues.value.text ?? ""
     const personId = userStore.userStored.id
-    const subCategory = itensValues.value.subCategoryId
+    const subCategory = Number(itensValues.value.subCategoryId)
     const images = [""]
     return {
-        id: 0,
+        id: id.value,
         title: title.toString(),
         text: text.toString(),
         personId: personId,
@@ -206,8 +231,10 @@ let dialog = ref<boolean>(false);
 let deleteDialog = ref<boolean>(false);
 
 const headers = [
+    { title: "id", key: "id"},
     { title: "Título", key: "title" },
-    { title: "Descrição", key: "text" }
+    { title: "Descrição", key: "text" },
+    { title: "Actions", key: "actions"}
 ]
 
 const onCloseDialog = () => {
@@ -217,22 +244,53 @@ const onCloseDialog = () => {
 
 const onNewItem = async () => {
     resetValues()
-    selectedAnnouncementComputed.value = resetedAnnouncement
     dialog.value = true
     await getCategories()
 }
 
 const onSaveItem = async () => {
-    onLoading();
-    await onSaveAnnouncement();
-    onLoading();
+    if (itensForm().id) {
+        await onUpdateAnnouncement()
+    } else {
+        await onSaveAnnouncement();
+    }
+    onCloseDialog();
+    await getAnnouncements();
+}
+
+const onEditItem = async (item: Announcement) => { 
+    id.value = item.id;
+    onResetValuesBySelectedValues(item)
+    onSetCategoryAndSubCategoryOnEdit(item.category)
+    dialog.value = true
+}
+
+const onDeleteItem = async () => {
+    await onDeleteAnnouncement();
+    await getAnnouncements();
+    onCloseDialog();
+}
+
+const onResetValuesBySelectedValues = (item: Announcement) => {
+    const entries = Object.entries(item);
+    itens.value.forEach(i => i.data = entries.find(e => e[0] == i.column)?.[1])
+}
+
+const onSetCategoryAndSubCategoryOnEdit = async (categorySelected: string) => {
+    await getCategories();
+    onUpdateCategory(categorySelected)
+    await getSubCategories();
+}
+
+const onDeleteDialog = (item: Announcement) => {
+    id.value = item.id;
+    deleteDialog.value = true
 }
 
 const resetValues = () => {
-    title.value = ""
-    description.value = ""
-    category.value = ""
-    subCategory.value = 0
+    id.value = 0;
+    category.value = "";
+    itens.value.forEach(i => i.data = "");
 }
 
 const getAnnouncements = async() => {
@@ -254,6 +312,28 @@ const onSaveAnnouncement = async () => {
     try {
         onLoading();
         await AnnouncementService.save(itensForm());
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
+const onUpdateAnnouncement = async () => {
+    try {
+        onLoading()
+        await AnnouncementService.update(itensForm());
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
+const onDeleteAnnouncement = async () => {
+    try {
+        onLoading()
+        await AnnouncementService.delete(id.value);
     } catch (e) {
         console.error(e);
     } finally {

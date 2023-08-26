@@ -36,16 +36,29 @@
                     <v-file-input
                         :label="item.title"
                         prepend-icon="mdi-camera"
-                        v-model="images"
+                        :multiple="true"
+                        :clearable="false"
+                        chips
                         :show-size="true"
-                        accept="image/png, image/jpeg, image/bmp"
+                        accept="image/png, image/jpeg, image/jpg, image/bmp"
                         @change="onFileChange"
                         @update:model-value="onUpdateImage"
-                        @click:clear="onClearImage"
                     >
                     </v-file-input>
-                    <v-img :width="300" :height="300" :src="imageUrl">
-                    </v-img>
+                    <v-card flat v-for="(image, i) in imagesUrl" :key="i">
+                        <template v-slot:title>
+                            <v-btn icon="mdi-close" size="x-small" @click="onClearImage(image.id)"></v-btn>
+                        </template>
+                        <template v-slot:text>
+                            <v-img :width="100" :height="100" :src="image.url"></v-img>
+                        </template>
+                    </v-card>
+                    <v-row no-gutters>
+                        <v-col v-for="(image, i) in imagesUrl" :key="i">
+                            <v-btn variant="text" icon="mdi-close" size="x-small" @click="onClearImage(image.id)"></v-btn>
+                            <v-img :width="100" :height="100" :src="image.url"></v-img>
+                        </v-col>
+                    </v-row>
                 </div>
             </v-row>
         </v-form>
@@ -101,6 +114,16 @@ interface Item {
     type: string
 }
 
+interface ImageUrl {
+    id: number,
+    url: any
+}
+
+interface ImageFile {
+    id: number,
+    file: File
+}
+
 let onValid = ref<boolean>(false);
 const form = ref();
 
@@ -113,7 +136,10 @@ let title = ref<string>("");
 let description = ref<string>("")
 let category = ref<string>("");
 let images = ref<Array<File>>()
-let imageUrl = ref<any>("")
+let imageUrl = ref<any>()
+
+let imagesUrl = ref<Array<ImageUrl>>([])
+let imagesFile = ref<Array<ImageFile>>([])
 
 let categories = ref<Array<IdAndName>>([]);
 let subCategories = ref<Array<IdAndName>>([]);
@@ -140,24 +166,42 @@ const onUpdateImage = (e: any) => {
     console.log(e)
 }
 
-const onClearImage = () => {
-    imageUrl.value = ""
+const onClearImage = (id: number) => {
+    imagesUrl.value.splice(id, 1)
+    imagesFile.value.splice(id, 1)
 }
 
 const onFileChange = async (file: any) => {
-    console.log(images.value)
-    console.log(file)
     if (!file) {
         return
     }
+    const files = file.target.files
+    let count = files.length;
+    let index = 0;
+
     const readData = (f: any) => 
         new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result)
-            reader.readAsDataURL(f.target.files[0]);
+            reader.readAsDataURL(f);
         })
-    const data = await readData(file);
-    imageUrl.value = data;
+
+    while(count --) {
+          const data = await readData(files[index])
+          const idAndUrl = {
+            id: index,
+            url: data
+          }
+          imagesUrl.value.push(idAndUrl)
+
+          const idAndFile = {
+            id: index,
+            file: files[index]
+          }
+          imagesFile.value.push(idAndFile)
+          index++
+        }
+    
 }
 
 const isCategorySelected = computed<boolean>(() => category.value.length == 0);

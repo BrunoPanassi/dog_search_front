@@ -32,34 +32,26 @@
                     @update:model-value="item.onChange"
                 >
                 </v-select>
-                <div v-else>
+                <v-row no-gutters v-else>
                     <v-file-input
                         :label="item.title"
                         prepend-icon="mdi-camera"
-                        :multiple="true"
+                        multiple
                         :clearable="false"
+                        :rules="item.validation"
                         chips
-                        :show-size="true"
                         accept="image/png, image/jpeg, image/jpg, image/bmp"
                         @change="onFileChange"
                         @update:model-value="onUpdateImage"
                     >
                     </v-file-input>
-                    <v-card flat v-for="(image, i) in imagesUrl" :key="i">
-                        <template v-slot:title>
-                            <v-btn icon="mdi-close" size="x-small" @click="onClearImage(image.id)"></v-btn>
-                        </template>
-                        <template v-slot:text>
-                            <v-img :width="100" :height="100" :src="image.url"></v-img>
-                        </template>
-                    </v-card>
                     <v-row no-gutters>
-                        <v-col v-for="(image, i) in imagesUrl" :key="i">
+                        <v-col v-for="(image, i) in imagesUrlFile" :key="i">
                             <v-btn variant="text" icon="mdi-close" size="x-small" @click="onClearImage(image.id)"></v-btn>
                             <v-img :width="100" :height="100" :src="image.url"></v-img>
                         </v-col>
                     </v-row>
-                </div>
+                </v-row>
             </v-row>
         </v-form>
         </template>
@@ -114,13 +106,9 @@ interface Item {
     type: string
 }
 
-interface ImageUrl {
-    id: number,
-    url: any
-}
-
-interface ImageFile {
-    id: number,
+interface Image {
+    id: string,
+    url: any,
     file: File
 }
 
@@ -136,10 +124,8 @@ let title = ref<string>("");
 let description = ref<string>("")
 let category = ref<string>("");
 let images = ref<Array<File>>()
-let imageUrl = ref<any>()
 
-let imagesUrl = ref<Array<ImageUrl>>([])
-let imagesFile = ref<Array<ImageFile>>([])
+let imagesUrlFile = ref<Array<Image>>([])
 
 let categories = ref<Array<IdAndName>>([]);
 let subCategories = ref<Array<IdAndName>>([]);
@@ -166,9 +152,9 @@ const onUpdateImage = (e: any) => {
     console.log(e)
 }
 
-const onClearImage = (id: number) => {
-    imagesUrl.value.splice(id, 1)
-    imagesFile.value.splice(id, 1)
+const onClearImage = (id: string) => {
+    const idToRemove = imagesUrlFile.value.findIndex(f => f.id == id)
+    imagesUrlFile.value.splice(idToRemove, 1)
 }
 
 const onFileChange = async (file: any) => {
@@ -188,17 +174,12 @@ const onFileChange = async (file: any) => {
 
     while(count --) {
           const data = await readData(files[index])
-          const idAndUrl = {
-            id: index,
-            url: data
-          }
-          imagesUrl.value.push(idAndUrl)
-
-          const idAndFile = {
-            id: index,
+          const idDataFile = {
+            id: files[index].name,
+            url: data,
             file: files[index]
           }
-          imagesFile.value.push(idAndFile)
+          imagesUrlFile.value.push(idDataFile)
           index++
         }
     
@@ -263,7 +244,7 @@ const itensValues = computed(() => {
         title: itens.value.find(i => i.column == "title")?.data,
         text: itens.value.find(i => i.column == "text")?.data,
         subCategoryId: itens.value.find(i => i.column == "subCategoryId")?.data,
-        images: [""]
+        images: imagesUrlFile.value.map(i => i.file)
     }
 })
 
@@ -272,7 +253,7 @@ const itensForm = () => {
     const text = itensValues.value.text ?? ""
     const personId = userStore.userStored.id
     const subCategory = Number(itensValues.value.subCategoryId)
-    const images = [""]
+    const images = itensValues.value.images[0]
     return {
         id: id.value,
         title: title.toString(),

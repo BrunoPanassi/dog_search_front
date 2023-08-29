@@ -15,9 +15,16 @@ class AnnouncementService {
     }
 
     save(form: AnnouncementSaveDTO) {
+        var formData = new FormData()
+        formData.append("multipart_file", form.images)
+        
         return AxiosService.post(`${this.path}/save`, form, {
             headers: {
-                "Authorization": `Bearer ${TokenService.getToken()}`
+                "Authorization": `Bearer ${TokenService.getToken()}`,
+                "Content-Type": "multipart/form-data"
+            },
+            params: {
+                "multipart_file": formData
             }
         })
     }

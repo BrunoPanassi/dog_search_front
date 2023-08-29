@@ -4,7 +4,7 @@ interface AnnouncementSaveDTO {
     text: string,
     personId: number,
     subCategoryId: number,
-    images: any
+    images: File
 }
 
 interface Announcement {

@@ -33,24 +33,24 @@
                 >
                 </v-select>
                 <v-row no-gutters v-else>
-                    <v-file-input
-                        :label="item.title"
-                        prepend-icon="mdi-camera"
-                        multiple
-                        :clearable="false"
-                        :rules="item.validation"
-                        chips
-                        accept="image/png, image/jpeg, image/jpg, image/bmp"
-                        @change="onFileChange"
-                        @update:model-value="onUpdateImage"
-                    >
-                    </v-file-input>
-                    <v-row no-gutters>
-                        <v-col v-for="(image, i) in imagesUrlFile" :key="i">
-                            <v-btn variant="text" icon="mdi-close" size="x-small" @click="onClearImage(image.id)"></v-btn>
-                            <v-img :width="100" :height="100" :src="image.url"></v-img>
-                        </v-col>
-                    </v-row>
+                   <v-col cols="12">
+                        <v-file-input
+                            :label="item.title"
+                            prepend-icon="mdi-camera"
+                            multiple
+                            :clearable="false"
+                            :rules="item.validation"
+                            chips
+                            accept="image/png, image/jpeg, image/jpg, image/bmp"
+                            @change="onFileChange"
+                            @update:model-value="onUpdateImage"
+                        >
+                        </v-file-input>
+                   </v-col>
+                    <v-col v-for="(image, i) in imagesUrlFile" :key="i">
+                        <v-btn variant="text" icon="mdi-close" size="small" @click="onClearImage(image.id)"></v-btn>
+                        <v-img :width="100" :height="100" :src="image.url"></v-img>
+                    </v-col>
                 </v-row>
             </v-row>
         </v-form>
@@ -157,6 +157,14 @@ const onClearImage = (id: string) => {
     imagesUrlFile.value.splice(idToRemove, 1)
 }
 
+const onDataFileToURl = (f: any) => {
+    return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result)
+            reader.readAsDataURL(f);
+        })
+}
+
 const onFileChange = async (file: any) => {
     if (!file) {
         return
@@ -165,15 +173,8 @@ const onFileChange = async (file: any) => {
     let count = files.length;
     let index = 0;
 
-    const readData = (f: any) => 
-        new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result)
-            reader.readAsDataURL(f);
-        })
-
     while(count --) {
-          const data = await readData(files[index])
+          const data = await onDataFileToURl(files[index])
           const idDataFile = {
             id: files[index].name,
             url: data,
@@ -265,6 +266,7 @@ const itensForm = () => {
 }
 
 const onCloseDialog = () => {
+    resetValues();
     emit('onCloseDialog')
 }
 
@@ -294,8 +296,30 @@ const onSetCategoryAndSubCategoryOnEdit = async (categorySelected: string) => {
     await getSubCategories();
 }
 
+const onDataUrlToFile = (dataUrl: string, fileName: string) => {
+    let arr = dataUrl.split(',')
+    let bstr = atob(arr[arr.length - 1])
+    let n = bstr.length
+    let u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], fileName, {type:'image/jpeg'});
+}
+
+const onSetImagesOnEdit = async (url: string) => {
+    let file = onDataUrlToFile(url, `image_${imagesUrlFile.value.length}`)
+    const idDataFile = {
+        id: `image_${imagesUrlFile.value.length}`,
+        url: `data:image/jpeg;base64, ${url}`,
+        file: file
+    }
+    imagesUrlFile.value.push(idDataFile)
+}
+
 const resetValues = () => {
     category.value = "";
+    imagesUrlFile.value = [];
     itens.value.forEach(i => i.data = "");
 }
 
@@ -304,7 +328,7 @@ const onSaveAnnouncement = async () => {
         onLoading();
         await AnnouncementService.save(itensForm());
     } catch (e) {
-        console.error(e);
+        console.error(e); // TODO: Alertar o error de response.response.data
     } finally {
         onLoading();
     }
@@ -343,9 +367,10 @@ const getSubCategories = async () => {
 }
 
 watch(dialog, (currDialog) => {
-    if (id.value) {
+    if (id.value && currDialog) {
         onResetValuesBySelectedValues(announcement.value)
         onSetCategoryAndSubCategoryOnEdit(announcement.value.category)
+        onSetImagesOnEdit(announcement.value.images)
     }
 })
 </script>

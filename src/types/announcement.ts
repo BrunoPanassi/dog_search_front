@@ -13,7 +13,8 @@ interface Announcement {
     text: string,
     person: string,
     category: string
-    subCategoryId: number
+    subCategoryId: number,
+    images: string
 }
 
 export type { AnnouncementSaveDTO }

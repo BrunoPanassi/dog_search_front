@@ -4,7 +4,7 @@ interface AnnouncementSaveDTO {
     text: string,
     personId: number,
     subCategoryId: number,
-    images: File
+    images: File[]
 }
 
 interface Announcement {
@@ -14,7 +14,7 @@ interface Announcement {
     person: string,
     category: string
     subCategoryId: number,
-    images: string
+    images: string[]
 }
 
 export type { AnnouncementSaveDTO }

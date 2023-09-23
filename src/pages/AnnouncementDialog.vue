@@ -254,7 +254,7 @@ const itensForm = () => {
     const text = itensValues.value.text ?? ""
     const personId = userStore.userStored.id
     const subCategory = Number(itensValues.value.subCategoryId)
-    const images = itensValues.value.images[0]
+    const images = itensValues.value.images
     return {
         id: id.value,
         title: title.toString(),
@@ -307,14 +307,16 @@ const onDataUrlToFile = (dataUrl: string, fileName: string) => {
     return new File([u8arr], fileName, {type:'image/jpeg'});
 }
 
-const onSetImagesOnEdit = async (url: string) => {
-    let file = onDataUrlToFile(url, `image_${imagesUrlFile.value.length}`)
-    const idDataFile = {
-        id: `image_${imagesUrlFile.value.length}`,
-        url: `data:image/jpeg;base64, ${url}`,
-        file: file
-    }
-    imagesUrlFile.value.push(idDataFile)
+const onSetImagesOnEdit = async (imagesUrl: string[]) => {
+    imagesUrl.forEach(url => {
+        let file = onDataUrlToFile(url, `image_${imagesUrlFile.value.length}`)
+        const idDataFile = {
+            id: `image_${imagesUrlFile.value.length}`,
+            url: `data:image/jpeg;base64, ${url}`,
+            file: file
+        }
+        imagesUrlFile.value.push(idDataFile)
+    })
 }
 
 const resetValues = () => {

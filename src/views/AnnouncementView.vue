@@ -66,7 +66,8 @@ const resetedAnnouncement = {
     text: "",
     person: "",
     category: "",
-    subCategoryId: 0
+    subCategoryId: 0,
+    images: [""]
 
 }
 let announcement = ref<Announcement>(resetedAnnouncement);

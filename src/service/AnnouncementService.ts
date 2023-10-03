@@ -33,7 +33,11 @@ class AnnouncementService {
     }
 
     delete(id: number) {
-        return AxiosService.delete(`${this.path}/${id}`)
+        return AxiosService.delete(`${this.path}/${id}`, {
+            headers: {
+                "Authorization": `Bearer ${TokenService.getToken()}`
+            }
+        })
     }
 
     getCities() {

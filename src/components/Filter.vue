@@ -27,6 +27,8 @@ import { onMounted, computed, ref, ComputedRef } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
 import type { Filter } from '@/types/filter';
 import { useAnnouncementStore } from '@/store/announcement';
+import { Announcement } from '@/types/announcement';
+import { AnnouncementDTO } from '@/types/announcement.dto';
 
 interface MenuItens {
   title: string
@@ -144,10 +146,20 @@ const getAnnouncements = async () => {
       city: city.value,
       subCategory: subCategory.value
     })
-    announcementStore.setAnnnouncements(data);
+    const announcements: Array<AnnouncementDTO> = data.map((announcement: Announcement) => {
+      return {
+        ...announcement,
+        images: setImageToBase64(announcement.images)
+      }
+    })
+    announcementStore.setAnnnouncements(announcements);
   } catch (e) {
     console.error(e)
   }
+}
+
+const setImageToBase64 = (images: Array<String>) => {
+  return images.map(image => `data:image/jpeg;base64, ${image}`)
 }
 
 const buttonClicked = async () => { 

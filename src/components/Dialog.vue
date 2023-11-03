@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px" :max-height="height">
         <template v-slot:activator="{ props }">
             <v-btn
                 color="primary"
@@ -38,12 +38,13 @@ let dialog = ref<boolean>(false);
 
 const props = defineProps({
     dialogClicked: { type: Boolean, required: true},
-    addButton: { type: Boolean, required: true, default: false}
+    addButton: { type: Boolean, required: true, default: false},
+    height: {type: String, required: false, default: '600px'}
 })
 
 const emit = defineEmits(['onDialogClicked', 'onNewClicked'])
 
-const { dialogClicked, addButton } = toRefs(props);
+const { dialogClicked, addButton, height } = toRefs(props);
 
 const onNewClicked = () => {
     emit('onNewClicked')

@@ -1,3 +1,4 @@
+import { Announcement } from "@/types/announcement";
 import { AnnouncementDTO } from "@/types/announcement.dto";
 import { defineStore } from "pinia";
 

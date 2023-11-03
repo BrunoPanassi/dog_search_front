@@ -3,7 +3,10 @@
         <Card
             v-for="(card) in announcementStore.getAnnouncements"
             :title="card.title" 
-            :subtitle="card.text"
+            :text="card.text"
+            :images="card.images"
+            :person-name="card.personName"
+            :phone-number="card.phoneNumber"
             :price="2000"
         />
     </v-main>

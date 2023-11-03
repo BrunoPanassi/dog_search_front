@@ -312,11 +312,16 @@ const onSetImagesOnEdit = async (imagesUrl: string[]) => {
         let file = onDataUrlToFile(url, `image_${imagesUrlFile.value.length}`)
         const idDataFile = {
             id: `image_${imagesUrlFile.value.length}`,
-            url: `data:image/jpeg;base64, ${url}`,
+            url: setImageToBase64(url),
             file: file
         }
         imagesUrlFile.value.push(idDataFile)
     })
+}
+
+const setImageToBase64 = (image: string) => {
+    const base64 = `data:image/jpeg;base64`;
+    return image.includes(base64) ? image : `${base64}, ${image}`
 }
 
 const resetValues = () => {

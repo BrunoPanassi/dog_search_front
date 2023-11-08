@@ -1,4 +1,4 @@
-import decode from 'jwt-decode';
+import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 interface JwtDecode {
     exp: number,
@@ -22,21 +22,28 @@ class TokenService {
     }
 
     getJwtDecode() {
-        let jwtDecoded: JwtDecode = {
-            exp: 0,
-            iat: 0,
-            sub: ""
-        };
+        let jwtDecodedObj;
         const token = this.getToken();
         if (!token)
             return null
         try {
-            jwtDecoded = decode(token);
+            jwtDecodedObj = jwtDecode<JwtPayload>(token);
         } catch (e) {
             console.error(e);
             alert("Ocorreu um erro ao decodificar o JWT") // TODO: Ajustar todos os alerts
         }
-        return jwtDecoded
+        return jwtDecodedObj
+    }
+
+    getRoles() {
+        let jwtDecoded = this.getJwtDecode();
+        if (!jwtDecoded) {
+            console.error("Erro ao tentar pegar o sub do token") // TODO: Formalizar todo
+            return null
+        }
+        return Object.entries(jwtDecoded)
+            .filter((k: Array<string>) => k[0].includes("role"))
+            .map((k: Array<string>) => k[1])
     }
 
     getSub() {

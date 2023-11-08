@@ -5,7 +5,8 @@ export const useUserStore = defineStore('user-store', {
     state: () => ({
         id: 0,
         name: "",
-        email: ""
+        email: "",
+        roles: [""]
     }),
     getters: {
         userStored: (state) => state
@@ -15,6 +16,7 @@ export const useUserStore = defineStore('user-store', {
             this.id = user.id
             this.name = user.name
             this.email = user.email
+            this.roles = user.roles
         }
     }
 })

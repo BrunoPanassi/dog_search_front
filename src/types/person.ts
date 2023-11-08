@@ -10,7 +10,8 @@ interface Person {
 interface PersonStore {
     id: number,
     name: string,
-    email: string
+    email: string,
+    roles: Array<string>
 }
 
 export type { Person }

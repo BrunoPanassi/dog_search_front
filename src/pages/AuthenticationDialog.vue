@@ -119,7 +119,8 @@ const setUserStore = (auth: AuthenticationResponse) => {
     const user: PersonStore = {
         id: auth.personId,
         name: auth.name,
-        email: auth.email
+        email: auth.email,
+        roles: TokenService.getRoles() ?? [""]
     }
     userStore.setUserStore(user);
 }

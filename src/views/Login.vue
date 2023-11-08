@@ -12,8 +12,8 @@
                 </v-card-title>
                 <v-card-text class="mt-2">
                     <v-form v-model="onValid" ref="form" validate-on="blur">
-                        <v-row v-for="(prop, i) in textFieldLabels" :class="prop.onlyForRegister && alreadyRegistered ? 'd-none' : ''" >
-                            <v-select v-if="prop.type == 'select'" 
+                        <v-row v-for="(prop, i) in textFieldLabels" :key="i">
+                            <v-select v-if="prop.type == 'select' && showRegisterFieldsOnlyIfIsNotAlreadyRegistered(prop.onlyForRegister)" 
                                 :loading="loading"
                                 :clearable="true"
                                 :label="prop.label"
@@ -25,8 +25,8 @@
                                 :item-value="prop.itemValue"
                             >
                             </v-select>
-                            <v-col v-else :key="i">
-                                <v-text-field :class="prop.onlyForRegister && alreadyRegistered ? 'd-none' : ''"
+                            <v-col v-else-if="prop.type != 'select' && showRegisterFieldsOnlyIfIsNotAlreadyRegistered(prop.onlyForRegister)" >
+                                <v-text-field
                                     validate-on="blur"
                                     :label="prop.label"
                                     hide-details="auto"
@@ -45,7 +45,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-row align="center" justify="center">
-                        <v-btn variant="outlined" color="green">
+                        <v-btn variant="outlined" color="green" @click="onConfirm">
                             {{ alreadyRegisteredActionButton }}
                         </v-btn>
                     </v-row>
@@ -56,8 +56,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, ComputedRef, watch, onMounted } from 'vue'
 import AuthenticationService from '@/service/AuthenticationService';
+import { Authentication, AuthenticationResponse } from '@/types/authentication';
+import { Register } from '@/types/register';
+import axios from 'axios';
+import TokenService from '@/service/TokenService';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/userStore';
+import { PersonStore } from '@/types/person';
 
 interface CountryStates {
     id: number
@@ -65,10 +72,13 @@ interface CountryStates {
     nome: string
 }
 
-let onValid = ref<boolean>(false);
+const router = useRouter();
+const userStore = useUserStore();
 
+let onValid = ref<boolean>(false);
 const form = ref();
 let loading = ref<boolean>(false);
+
 let name = ref<string>("");
 let email = ref<string>("");
 let password = ref<string>("");
@@ -84,6 +94,29 @@ const toogleAlreadyRegistered = () => alreadyRegistered.value = !alreadyRegister
 const alreadyRegisteredButton = computed(() => alreadyRegistered.value ? 'Cadastrar-se' : 'Já tenho conta')
 const alreadyRegisteredTitle = computed(() => alreadyRegistered.value ? 'Login' : 'Cadastrar')
 const alreadyRegisteredActionButton = computed(() => alreadyRegistered.value ? 'Logar' : 'Cadastrar')
+const showRegisterFieldsOnlyIfIsNotAlreadyRegistered = (onlyForRegister: boolean) => {
+    if (onlyForRegister && alreadyRegistered.value) return false;
+    return true;
+}
+
+const authenticationFieldValues: ComputedRef<Authentication> = computed(() => {
+    return {
+        password: password.value,
+        email: email.value
+    }
+})
+
+const registerFieldValues: ComputedRef<Register> = computed(() => {
+    return {
+        name: name.value,
+        city: city.value,
+        neighbourhood: neighbourhood.value,
+        phoneNumber: phoneNumber.value,
+        password: password.value,
+        email: email.value
+    }
+})
+
 const textFieldLabels = ref([
     {
         label: "Nome",
@@ -99,7 +132,6 @@ const textFieldLabels = ref([
         model: email,
         type: "email",
         onlyForRegister: false,
-        class: alreadyRegistered.value ? 'd-none' : '',
         counter: 80,
         icon: "mdi-email",
         placeholder: "nome@email.com",
@@ -110,7 +142,6 @@ const textFieldLabels = ref([
         model: password,
         type: "password",
         onlyForRegister: false,
-        class: alreadyRegistered.value ? 'd-none' : '',
         icon: "mdi-form-textbox-password",
         counter: 30,
         validation: [AuthenticationService.requiredField]
@@ -123,7 +154,6 @@ const textFieldLabels = ref([
         model: state,
         type: "select",
         onlyForRegister: true,
-        class: alreadyRegistered.value ? 'd-none' : '',
         counter: 20,
         icon: "mdi-city-variant",
         validation: [AuthenticationService.requiredField]
@@ -136,7 +166,6 @@ const textFieldLabels = ref([
         model: city,
         type: "select",
         onlyForRegister: true,
-        class: alreadyRegistered.value ? 'd-none' : '',
         counter: 20,
         icon: "mdi-city",
         validation: [AuthenticationService.requiredField]
@@ -146,7 +175,6 @@ const textFieldLabels = ref([
         model: neighbourhood,
         type: "input",
         onlyForRegister: true,
-        class: alreadyRegistered.value ? 'd-none' : '',
         counter: 30,
         icon: "mdi-home-group",
         validation: [AuthenticationService.requiredField]
@@ -156,7 +184,6 @@ const textFieldLabels = ref([
         model: phoneNumber,
         type: "input",
         onlyForRegister: true,
-        class: alreadyRegistered.value ? 'd-none' : '',
         counter: 15,
         icon: "mdi-phone",
         placeholder: "(99) 99999-9999",
@@ -179,6 +206,54 @@ const onGetCityByState = async () => {
 }
 
 const onLoading = () => loading.value = !loading.value
+
+const onConfirm = () => {
+    if (alreadyRegistered.value) {
+        onAuthenticate();
+    }
+}
+
+const onAuthenticate = async () => {
+    const { valid } = await form.value.validate()
+    if (valid && onValid) {
+        try {
+            onLoading()
+            const { data } = await AuthenticationService.authenticate(authenticationFieldValues.value);
+            setToken(data)
+            pushToView()
+            setUserStore(data)
+        } catch (error) {
+            axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
+        } finally {
+            onLoading()
+        }
+    } else {
+        alert("Campos não estão válidos, confira novamente.")
+    }
+}
+
+const setToken = (auth: AuthenticationResponse) => {
+    if (auth.token) TokenService.setToken(auth.token)
+}
+
+const pushToView = () => {
+    if (getRoles()?.find(r => r == "Admin")) pushToAdminView()
+    else pushToUserView();
+}
+const pushToAdminView = () => router.push('admin');
+const pushToUserView = () => router.push('user');
+
+const getRoles = () => TokenService.getRoles() ?? [""]
+
+const setUserStore = (auth: AuthenticationResponse) => {
+    const user: PersonStore = {
+        id: auth.personId,
+        name: auth.name,
+        email: auth.email,
+        roles: getRoles()
+    }
+    userStore.setUserStore(user);
+}
 
 watch(state, (currState) => {
     if (currState) {

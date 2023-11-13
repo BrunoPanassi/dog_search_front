@@ -26,7 +26,8 @@
                     :rules="prop.validation"
                     :type="prop.type"
                     v-model="prop.model"
-                    ></v-text-field>
+                    v-maska:[prop.mask]>
+                </v-text-field>
             </v-col>
         </v-row>
     </v-form>
@@ -42,6 +43,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/userStore';
 import { PersonStore } from '@/types/person';
 import TokenService from '@/service/TokenService';
+import { Mask } from 'maska';
 
 interface CountryStates {
     id: number
@@ -69,6 +71,7 @@ let password = ref<string>("");
 let city = ref<string>("");
 let neighbourhood = ref<string>("");
 let phoneNumber = ref<string>("");
+const phoneNumberMask = { mask: "(##) #####-####"};
 let state = ref();
 let countryStates = ref<Array<CountryStates>>([]);
 let countryCities = ref();
@@ -165,6 +168,7 @@ const textFieldLabels = ref([
         counter: 15,
         icon: "mdi-phone",
         placeholder: "(99) 99999-9999",
+        mask: phoneNumberMask,
         validation: [AuthenticationService.requiredField, AuthenticationService.isAValidPhoneNumber]
     }
 ])

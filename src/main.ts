@@ -17,12 +17,15 @@ import { registerPlugins } from '@/plugins'
 // Router
 import router from './router'
 
+import { vMaska } from 'maska'
+
 const pinia = createPinia()
 
 const app = createApp(App)
 
 app.use(pinia)
 app.use(router)
+app.directive("maska", vMaska);
 registerPlugins(app)
 
 app.mount('#app')

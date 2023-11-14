@@ -13,7 +13,7 @@
         <template v-slot:text>
             <LoginForm 
                 :already-registered="alreadyRegistered" 
-                :toggle-get-data="confirmButton"
+                :toggle-confirm-button="confirmButton"
                 @on-loading="onLoading">
             </LoginForm>
         </template>

@@ -43,7 +43,6 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/userStore';
 import { PersonStore } from '@/types/person';
 import TokenService from '@/service/TokenService';
-import { Mask } from 'maska';
 
 interface CountryStates {
     id: number
@@ -52,10 +51,10 @@ interface CountryStates {
 }
 
 const props= defineProps({
-    toggleGetData: {type: Boolean, required: true},
+    toggleConfirmButton: {type: Boolean, required: true},
     alreadyRegistered: {type: Boolean, required: true}
 })
-const { toggleGetData, alreadyRegistered } = toRefs(props);
+const { toggleConfirmButton, alreadyRegistered } = toRefs(props);
 const emit = defineEmits(['onLoading'])
 
 const router = useRouter();
@@ -241,7 +240,7 @@ const isFormvalid = async () => {
     return false;
 }
 
-watch(toggleGetData, async () => {
+watch(toggleConfirmButton, async () => {
     const toRegister = false;
     const toAuthenticate = true;
     if (await isFormvalid()) {

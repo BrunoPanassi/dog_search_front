@@ -236,7 +236,7 @@ const setToken = (auth: AuthenticationResponse) => {
 }
 
 const pushToView = () => {
-    if (getRoles()?.find(r => r == "Admin")) pushToAdminView()
+    if (TokenService.isAdmin()) pushToAdminView()
     else pushToUserView();
 }
 const pushToAdminView = () => router.push('admin');

@@ -1,5 +1,6 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+import TokenService from '@/service/TokenService'
 
 const routes = [
   {
@@ -10,12 +11,26 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    component: () => import('@/views/Admin.vue')
+    component: () => import('@/views/Admin.vue'),
+    beforeEnter: (to:RouteLocationNormalized, from:RouteLocationNormalized, next:NavigationGuardNext) => {
+      if (TokenService.isSignedIn() && !TokenService.isExpired() && TokenService.isAdmin()) {
+        next();
+        return
+      }
+      next('/login')
+    }
   },
   {
     path: '/user',
     name: 'User',
-    component: () => import('@/views/User.vue')
+    component: () => import('@/views/User.vue'),
+    beforeEnter: (to:RouteLocationNormalized, from:RouteLocationNormalized, next:NavigationGuardNext) => {
+      if (TokenService.isSignedIn() && !TokenService.isExpired()) {
+        next();
+        return
+      }
+      next('/login')
+    }
   },
   {
     path: '/login',

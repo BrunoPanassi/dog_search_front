@@ -63,6 +63,11 @@ class TokenService {
             .map((k: Array<string>) => k[1])
     }
 
+    isAdmin() {
+        if (this.getRoles()) return this.getRoles()?.find(r => r == "Admin")
+        return false
+    }
+
     getSub() {
         let jwtDecoded = this.getJwtDecode();
         if (!jwtDecoded) {
@@ -76,6 +81,13 @@ class TokenService {
         let jwtDecoded = this.getJwtDecode();
         if (!jwtDecoded)
             return false
+        return true;
+    }
+
+    isExpired() {
+        let jwtDecoded = this.getJwtDecode();
+        if (!jwtDecoded)
+            return true
         let exp = jwtDecoded.exp;
         const isExpired = !!exp && Date.now() > exp; // TODO: Verificar se precisa multiplicar por 1000
         return isExpired

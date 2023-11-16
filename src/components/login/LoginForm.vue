@@ -12,6 +12,15 @@
                 :item-title="prop.itemTitle"
                 :item-value="prop.itemValue"
             >
+                <template v-slot:prepend-item>
+                    <v-text-field
+                        label="Filtro"
+                        placeholder="Digite aqui o filtro"
+                        prepend-inner-icon="mdi-magnify"
+                        variant="outlined"
+                        v-model="prop.filter">
+                    </v-text-field>
+                </template>
             </v-select>
             <v-col v-else-if="prop.type != 'select' && showRegisterFieldsOnlyIfIsNotAlreadyRegistered(prop.onlyForRegister)" >
                 <v-text-field
@@ -50,6 +59,10 @@ interface CountryStates {
     nome: string
 }
 
+interface CountryCities {
+    nome: string
+}
+
 const props= defineProps({
     toggleConfirmButton: {type: Boolean, required: true},
     alreadyRegistered: {type: Boolean, required: true}
@@ -68,12 +81,14 @@ let name = ref<string>("");
 let email = ref<string>("");
 let password = ref<string>("");
 let city = ref<string>("");
+let cityFilter = ref<string>("");
 let neighbourhood = ref<string>("");
 let phoneNumber = ref<string>("");
 const phoneNumberMask = { mask: "(##) #####-####"};
 let state = ref();
+let stateFilter = ref<string>("");
 let countryStates = ref<Array<CountryStates>>([]);
-let countryCities = ref();
+let countryCities = ref<Array<CountryCities>>([]);
 
 const showRegisterFieldsOnlyIfIsNotAlreadyRegistered = (onlyForRegister: boolean) => {
     if (onlyForRegister && alreadyRegistered.value) return false;
@@ -93,6 +108,9 @@ const onGetCityByState = async () => {
     countryCities.value = cities;
     onLoading()
 }
+
+const statesFiltered = computed(() => countryStates.value.filter((state: CountryStates) => stateFilter.value ? state.nome.includes(stateFilter.value) : state))
+const citiesFiltered = computed(() => countryCities.value.filter((city: CountryCities) => cityFilter.value ? city.nome.includes(cityFilter.value) : city))
 
 const onLoading = () => loading.value = !loading.value
 const emitLoading = () => emit('onLoading', loading.value)
@@ -128,10 +146,11 @@ const textFieldLabels = ref([
     },
     {
         label: "Estado",
-        items: countryStates,
+        items: statesFiltered,
         itemTitle: "nome",
         itemValue: "id",
         model: state,
+        filter: stateFilter,
         type: "select",
         onlyForRegister: true,
         counter: 20,
@@ -140,10 +159,11 @@ const textFieldLabels = ref([
     },
     {
         label: "Cidade",
-        items: countryCities,
+        items: citiesFiltered,
         itemTitle: "nome",
         itemValue: "nome",
         model: city,
+        filter: cityFilter,
         type: "select",
         onlyForRegister: true,
         counter: 20,

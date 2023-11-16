@@ -1,5 +1,6 @@
 import { IdAndName } from "@/types/idAndName";
 import AxiosService from "./AxiosService";
+import TokenService from "./TokenService";
 
 class CategoryService {
     path = '/category';
@@ -13,15 +14,15 @@ class CategoryService {
     }
 
     save(form: IdAndName) {
-        return AxiosService.post(`${this.path}/save`, form)
+        return AxiosService.post(`${this.path}/save`, form, TokenService.getAuthorizationHeader())
     }
 
     update(form: IdAndName) {
-        return AxiosService.put(`${this.path}/save/${form.id}`, form)
+        return AxiosService.put(`${this.path}/save/${form.id}`, form, TokenService.getAuthorizationHeader())
     }
 
     delete(id: number) {
-        return AxiosService.delete(`${this.path}/${id}`)
+        return AxiosService.delete(`${this.path}/${id}`, TokenService.getAuthorizationHeader())
     }
 }
 

@@ -15,29 +15,15 @@ class AnnouncementService {
     }
 
     save(form: AnnouncementSaveDTO) {
-        return AxiosService.post(`${this.path}/save`, form, {
-            headers: {
-                "Authorization": `Bearer ${TokenService.getToken()}`,
-                "Content-Type": "multipart/form-data"
-            }
-        })
+        return AxiosService.post(`${this.path}/save`, form, TokenService.getAuthorizationAndMultipartFormDataHeader())
     }
 
     update(form: AnnouncementSaveDTO) {
-        return AxiosService.put(`${this.path}/save/${form.id}`, form, {
-            headers: {
-                "Authorization": `Bearer ${TokenService.getToken()}`,
-                "Content-Type": "multipart/form-data"
-            }
-        })
+        return AxiosService.put(`${this.path}/save/${form.id}`, form, TokenService.getAuthorizationAndMultipartFormDataHeader())
     }
 
     delete(id: number) {
-        return AxiosService.delete(`${this.path}/${id}`, {
-            headers: {
-                "Authorization": `Bearer ${TokenService.getToken()}`
-            }
-        })
+        return AxiosService.delete(`${this.path}/${id}`, TokenService.getAuthorizationHeader())
     }
 
     getCities() {
@@ -49,11 +35,7 @@ class AnnouncementService {
     }
 
     getByEmail(email: string) {
-        return AxiosService.get(`${this.path}/by-email/${email}`, {
-            headers: {
-                "Authorization": `Bearer ${TokenService.getToken()}`
-            }
-        })
+        return AxiosService.get(`${this.path}/by-email/${email}`, TokenService.getAuthorizationHeader())
     }
 }
 

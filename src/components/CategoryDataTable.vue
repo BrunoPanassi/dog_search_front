@@ -42,8 +42,8 @@
             </template>
             <template v-slot:item.actions="{ item }">
                 <DataTableActionButtons 
-                    @edit="onEditItem(item.raw)" 
-                    @delete="onDeleteDialog(item.raw)" 
+                    @edit="onEditItem(item)" 
+                    @delete="onDeleteDialog(item)" 
                 />
             </template>
         </v-data-table>

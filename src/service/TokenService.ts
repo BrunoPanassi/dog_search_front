@@ -21,6 +21,23 @@ class TokenService {
         localStorage.removeItem(this.tokenProp)
     }
 
+    getAuthorizationHeader() {
+        return {
+            headers: {
+                "Authorization": `Bearer ${this.getToken()}`
+            }
+        }
+    }
+
+    getAuthorizationAndMultipartFormDataHeader() {
+        return {
+            headers: {
+                "Authorization": `Bearer ${this.getToken()}`,
+                "Content-Type": "multipart/form-data"
+            }
+        }
+    }
+
     getJwtDecode() {
         let jwtDecodedObj;
         const token = this.getToken();

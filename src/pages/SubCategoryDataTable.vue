@@ -32,7 +32,6 @@
                             density="compact"
                             :disabled="!selectedCategoryId"
                             v-model="name"
-
                             ></v-text-field>
                         </template>
                         <template v-slot:actions>
@@ -49,7 +48,35 @@
                     </Dialog>
                 </v-toolbar>
             </template>
+            <template v-slot:item.actions="{ item }">
+                <DataTableActionButtons 
+                    @edit="onEditItem(item)" 
+                    @delete="onDeleteDialog(item)" 
+                />
+            </template>
         </v-data-table>
+        <Dialog 
+            :dialog-clicked="deleteDialog" 
+            @on-dialog-clicked="onCloseDialog()" 
+            :add-button="false"
+        >
+            <template v-slot:title>
+                Confirmar
+            </template>
+            <template v-slot:content>
+                <p class="text-h6 text-center">Deseja excluir o registro?</p>
+            </template>
+            <template v-slot:actions>
+                <v-spacer></v-spacer>
+                <ActionButtons 
+                    :cancel-title="'Cancel'" 
+                    :confirm-title="'Delete'"
+                    :loading="loading"
+                    @close="onCloseDialog()"
+                    @confirm="onDeleteItem()" 
+                />
+           </template>
+        </Dialog>
     </div>
 </template>
 
@@ -57,6 +84,7 @@
 import CategoryService from '@/service/CategoryService'
 import SubCategoryService from '@/service/SubCategoryService';
 import ActionButtons from '@/components/ActionButtons.vue'
+import DataTableActionButtons from '@/components/DataTableActionButtons.vue'
 import Dialog from '@/components/Dialog.vue'
 import { IdAndName } from '@/types/idAndName';
 import { SubCategory, SubCategorySaveDTO } from '@/types/subCategory';
@@ -151,6 +179,17 @@ const onUpdateSubCategory = async () => {
     }
 }
 
+const onDeleteSubCategory = async () => {
+    try {
+        onLoading();
+        await SubCategoryService.delete(selectedComputed.value.id);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        onLoading();
+    }
+}
+
 const onSaveItem = async () => {
     onSetSubCategoryAfterSave()
     if (isOnUpdate.value) {
@@ -167,8 +206,25 @@ const onCloseDialog = () => {
     deleteDialog.value = false
 }
 
+const onDeleteDialog = (item: SubCategory) => {
+    selectedComputed.value = item
+    deleteDialog.value = true
+}
+
+const onDeleteItem = async () => {
+    await onDeleteSubCategory()
+    await getSubCategories()
+    onCloseDialog()
+}
+
+const onEditItem = async (item: SubCategory) => {
+    name.value = item.name;
+    selectedCategoryId.value = item.category.id;
+    selectedComputed.value = item;
+    dialog.value = !dialog.value 
+}
+
 const onNewItem = async () => {
-    await getCategories()
     name.value = ""
     selectedComputed.value = onResetSubCategory()
     subCategorySaveForm.value = onResetSubCategorySaveForm()
@@ -176,6 +232,7 @@ const onNewItem = async () => {
 }
 
 onMounted(async () => {
+    await getCategories();
     await getSubCategories();
 })
 

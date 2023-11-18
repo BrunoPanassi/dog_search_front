@@ -89,7 +89,7 @@ class TokenService {
         if (!jwtDecoded)
             return true
         let exp = jwtDecoded.exp;
-        const isExpired = !!exp && Date.now() > exp; // TODO: Verificar se precisa multiplicar por 1000
+        const isExpired = !!exp && Date.now() > exp * 1000; // TODO: Verificar se precisa multiplicar por 1000
         return isExpired
     }
 }

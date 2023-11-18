@@ -221,7 +221,7 @@ const onAuthenticateOrRegister = async (isRegister: Boolean) => {
         emitLoading()
         const { data } = await getDataFromAuthenticateOrRegister(isRegister);
         setToken(data)
-        pushToView()
+        pushToUserView()
         setUserStore(data)
     } catch (error) {
         axios.isAxiosError(error) ? alert(error.response?.data) : console.error(error);
@@ -235,11 +235,6 @@ const setToken = (auth: AuthenticationResponse) => {
     if (auth.token) TokenService.setToken(auth.token)
 }
 
-const pushToView = () => {
-    if (TokenService.isAdmin()) pushToAdminView()
-    else pushToUserView();
-}
-const pushToAdminView = () => router.push('admin');
 const pushToUserView = () => router.push('user');
 
 const getRoles = () => TokenService.getRoles() ?? [""]

@@ -3,6 +3,7 @@
         :dialog-clicked="dialog"
         :add-button="false"
         @on-dialog-clicked="onCloseDialog()"
+        height="720px"
     >
         <template v-slot:title>
             {{ title }}
@@ -15,9 +16,6 @@
                     cover
                 ></v-carousel-item>
             </v-carousel>
-            <p class="text-body-1 pa-2 font-weight-bold text-light-green-darken-2">
-                {{ `R$${price}` }}
-            </p>
             <p class="text-body-2 pa-2">
                 {{ text }}
             </p>
@@ -44,14 +42,12 @@ const props = defineProps({
     dialog: {type: Boolean, required: true},
     title: {type: String, required: true},
     text: {type: String, required: true},
-    price: {type: Number, required: true},
     phoneNumber: { type: String, required: true},
     personName: { type: String, required: true},
     images: {type: Array<string>, required: true}
 })
 const { dialog, 
         title,
-        price,
         images,
         phoneNumber,
         personName } = toRefs(props);

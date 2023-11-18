@@ -10,7 +10,6 @@
                     :images="card.images"
                     :person-name="card.personName"
                     :phone-number="card.phoneNumber"
-                    :price="2000"
                 />
             </v-col>
         </v-row>

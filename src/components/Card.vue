@@ -11,9 +11,6 @@
             {{ text }}
         </v-card-text>
         <v-card-actions>
-            <p class="font-weight-bold text-light-green-darken-2">
-                {{ `R$ ${price}` }}
-            </p>
             <v-spacer></v-spacer>
             <v-btn variant="tonal" @click="onOpenPost">
                 Ver Mais
@@ -23,7 +20,6 @@
             :dialog="dialog"
             :title="title"
             :text="text"
-            :price="price"
             :person-name="personName"
             :phone-number="phoneNumber"
             :images="images"
@@ -44,7 +40,6 @@ const { title, text, images } = defineProps({
     images: { type: Array<string>, required: true},
     phoneNumber: { type: String, required: true},
     personName: { type: String, required: true},
-    price: { type: Number, required: true}
 })
 
 const coverImage = computed(() => images.at(0) ?? "")

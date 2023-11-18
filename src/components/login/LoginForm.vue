@@ -210,12 +210,12 @@ const registerFieldValues: ComputedRef<Register> = computed(() => {
     }
 })
 
-const getDataFromAuthenticateOrRegister = (isRegister: Boolean) => {
+const getDataFromAuthenticateOrRegister = (isRegister: boolean) => {
     if (isRegister) return AuthenticationService.register(registerFieldValues.value);
     return AuthenticationService.authenticate(authenticationFieldValues.value);
 }
 
-const onAuthenticateOrRegister = async (isRegister: Boolean) => {
+const onAuthenticateOrRegister = async (isRegister: boolean) => {
     try {
         onLoading()
         emitLoading()

@@ -1,12 +1,19 @@
 import { defineStore } from "pinia";
 import { PersonStore } from "@/types/person";
 
+const resetedUser = {
+    id: 0,
+    name: "",
+    email: "",
+    roles: [""] 
+}
+
 export const useUserStore = defineStore('user-store', {
     state: () => ({
-        id: 0,
-        name: "",
-        email: "",
-        roles: [""]
+        id: resetedUser.id,
+        name: resetedUser.name,
+        email: resetedUser.email,
+        roles: resetedUser.roles
     }),
     getters: {
         userStored: (state) => state
@@ -17,6 +24,12 @@ export const useUserStore = defineStore('user-store', {
             this.name = user.name
             this.email = user.email
             this.roles = user.roles
+        },
+        resetUserStore() {
+            this.id = resetedUser.id
+            this.name = resetedUser.name
+            this.email = resetedUser.email
+            this.roles = resetedUser.roles
         }
     }
 })

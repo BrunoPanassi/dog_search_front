@@ -16,8 +16,12 @@ const routes = [
       if (TokenService.isSignedIn() && !TokenService.isExpired() && TokenService.isAdmin()) {
         next();
         return
+      } else if (TokenService.isExpired()) {
+        alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
+        next('/login')
+        return
       }
-      next('/login')
+      next(from.path)
     }
   },
   {
@@ -28,6 +32,8 @@ const routes = [
       if (TokenService.isSignedIn() && !TokenService.isExpired()) {
         next();
         return
+      } else if (TokenService.isExpired()) {
+        alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
       }
       next('/login')
     }

@@ -11,12 +11,13 @@
         <v-card min-width="300">
             <v-list>
                 <v-list-item
-                    title="Usuário"
-                    subtitle="Não logado"
+                    :title="userTitle()"
+                    :subtitle="userSubtitle"
                 >
                 <template v-slot:prepend>
                     <v-avatar>
-                        <v-icon icon="mdi-account-off"></v-icon>
+                        <v-icon v-if="userLoggedIn" icon="mdi-account"></v-icon>
+                        <v-icon v-else icon="mdi-account-off"></v-icon>
                     </v-avatar>
                 </template>
                 </v-list-item>
@@ -43,7 +44,7 @@
 
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn>Deslogar</v-btn>
+                <v-btn @click="onLogout">Deslogar</v-btn>
                 <v-btn @click="onAuthenticate">Logar</v-btn>
             </v-card-actions>
         </v-card>
@@ -53,15 +54,24 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, ref } from 'vue';
+import { useUserStore } from '@/store/userStore';
 
-const emit = defineEmits(["openNewAccount", "onAuthenticate"]);
+const userStore = useUserStore();
+const emit = defineEmits(["openNewAccount", "onAuthenticate", "onLogout", "onUserConfiguration"]);
 
 const onAuthenticate = () => emit("onAuthenticate");
+const onLogout = () => emit("onLogout");
+
+const userLoggedIn = computed(() => !!userStore.name)
+const userSubtitle = computed(() => userStore.email)
+const userTitle = () => userLoggedIn.value ? userStore.name : "Não Logado"
+
 
 const accountMenuItens = [
     {
         label: "Configurações",
-        function: () => {}
+        function: () => { emit("onUserConfiguration") }
     },
     {
         label: "Criar Nova Conta",

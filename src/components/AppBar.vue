@@ -11,6 +11,8 @@
         <UserMenu 
             @open-new-account="onNewAccount()" 
             @on-authenticate="onAuthenticate()"
+            @on-logout="onLogout()"
+            @on-user-configuration="onUserConfiguration()"
         />
 
         <RegisterDialog 
@@ -32,7 +34,12 @@ import UserMenu from '@/components/UserMenu.vue'
 import { ref } from 'vue';
 import RegisterDialog from '@/pages/RegisterDialog.vue';
 import AuthenticationDialog from '@/pages/AuthenticationDialog.vue';
+import TokenService from '@/service/TokenService';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/userStore';
 
+const router = useRouter();
+const userStore = useUserStore();
 const drawerStore = useDrawerStore();
 const appBarStore = useAppBarStore();
 
@@ -47,5 +54,13 @@ const onCloseRegisterDialog = () => { registerDialog.value = false }
 let authenticationDialog = ref<boolean>(false);
 const onAuthenticate = () => { authenticationDialog.value = true }
 const onCloseAuthenticationDialog = () => { authenticationDialog.value = false }
+
+const onUserConfiguration = () => router.push('user')
+
+const onLogout = () => {
+    TokenService.signOut()
+    userStore.resetUserStore();
+    router.push('/')
+}
 
 </script>

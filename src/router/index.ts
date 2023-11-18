@@ -13,12 +13,13 @@ const routes = [
     name: 'Admin',
     component: () => import('@/views/Admin.vue'),
     beforeEnter: (to:RouteLocationNormalized, from:RouteLocationNormalized, next:NavigationGuardNext) => {
-      if (TokenService.isSignedIn() && !TokenService.isExpired() && TokenService.isAdmin()) {
+      if (TokenService.isSignedIn() && TokenService.isAdmin()) {
+        if (TokenService.isExpired()) {
+          alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
+          next('/login')
+          return
+        }
         next();
-        return
-      } else if (TokenService.isExpired()) {
-        alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
-        next('/login')
         return
       }
       next(from.path)
@@ -29,11 +30,14 @@ const routes = [
     name: 'User',
     component: () => import('@/views/User.vue'),
     beforeEnter: (to:RouteLocationNormalized, from:RouteLocationNormalized, next:NavigationGuardNext) => {
-      if (TokenService.isSignedIn() && !TokenService.isExpired()) {
+      if (TokenService.isSignedIn()) {
+        if (TokenService.isExpired()) {
+          alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
+          next('/login')
+          return
+        }
         next();
         return
-      } else if (TokenService.isExpired()) {
-        alert('O seu acesso foi expirado e estará sendo redirecionado para a página de login')
       }
       next('/login')
     }

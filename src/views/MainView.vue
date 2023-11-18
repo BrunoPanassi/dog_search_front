@@ -1,14 +1,19 @@
 <template>
     <v-main>
-        <Card
-            v-for="(card) in announcementStore.getAnnouncements"
-            :title="card.title" 
-            :text="card.text"
-            :images="card.images"
-            :person-name="card.personName"
-            :phone-number="card.phoneNumber"
-            :price="2000"
-        />
+        <v-row>
+            <v-col 
+                v-for="(card, i) in announcementStore.getAnnouncements" :key="i" 
+                cols="12" sm="6" md="4" lg="3" xl="3" xxl="2">
+                <Card
+                    :title="card.title" 
+                    :text="card.text"
+                    :images="card.images"
+                    :person-name="card.personName"
+                    :phone-number="card.phoneNumber"
+                    :price="2000"
+                />
+            </v-col>
+        </v-row>
     </v-main>
 </template>
 

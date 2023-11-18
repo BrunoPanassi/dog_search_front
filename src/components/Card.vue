@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto my-5" max-width="344">
+    <v-card class="mx-auto my-5 elevation-4" max-width="344" height="344">
         <v-img
         :src=coverImage
         height="200px"

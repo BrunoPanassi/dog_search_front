@@ -29,12 +29,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, toRefs } from 'vue';
 import PostDialog from '@/pages/PostDialog.vue';
 
 let dialog = ref<boolean>(false);
 
-const { title, text, images } = defineProps({
+const props = defineProps({
     title: { type: String, required: true },
     text: { type: String, required: true },
     images: { type: Array<string>, required: true},
@@ -42,7 +42,9 @@ const { title, text, images } = defineProps({
     personName: { type: String, required: true},
 })
 
-const coverImage = computed(() => images.at(0) ?? "")
+let { title, text, images } = toRefs(props);
+
+let coverImage = computed(() => images.value.at(0) ?? "")
 
 const onOpenPost = () => dialog.value = true;
 const onClosePost = () => dialog.value = false;

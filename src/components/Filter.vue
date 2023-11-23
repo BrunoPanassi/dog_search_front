@@ -23,7 +23,7 @@ import CenterItem from '@/components/CenterItem.vue'
 import AnnouncementService from '@/service/AnnouncementService'
 import CategoryService from '@/service/CategoryService';
 import SubCategoryService from '@/service/SubCategoryService'
-import { onMounted, computed, ref, ComputedRef } from 'vue';
+import { onMounted, computed, ref, ComputedRef, watch } from 'vue';
 import type { IdAndName } from '@/types/idAndName';
 import type { Filter } from '@/types/filter';
 import { useAnnouncementStore } from '@/store/announcement';
@@ -54,6 +54,8 @@ let subCategoryLoading = false;
 const announcementStore = useAnnouncementStore();
 
 const emit = defineEmits(['clicked'])
+
+let page = computed(() => announcementStore.getPage)
 
 const computedCities = computed<Array<string>>(() => cities.value);
 const computedCategories = computed<Array<string>>(() => categories.value);
@@ -145,8 +147,11 @@ const getAnnouncements = async () => {
     const { data } = await AnnouncementService.getCityAndSubCategory({
       city: city.value,
       subCategory: subCategory.value
-    })
-    const announcements: Array<AnnouncementDTO> = data.map((announcement: Announcement) => {
+    },
+    announcementStore.getPage,
+    announcementStore.getPageSize)
+    setTotalPages(data.totalPages)
+    const announcements: Array<AnnouncementDTO> = data.content.map((announcement: Announcement) => {
       return {
         ...announcement,
         images: setImageToBase64(announcement.images)
@@ -162,6 +167,10 @@ const setImageToBase64 = (images: Array<String>) => {
   return images.map(image => `data:image/jpeg;base64, ${image}`)
 }
 
+const setTotalPages = (total: number) => {
+  announcementStore.setTotalPages(total)
+}
+
 const buttonClicked = async () => { 
   emit('clicked')
   await getAnnouncements()
@@ -172,6 +181,8 @@ onMounted(async () => {
   await getCategories();
 })
 
-
+watch(page, (curr => {
+  getAnnouncements();
+}))
 
 </script>

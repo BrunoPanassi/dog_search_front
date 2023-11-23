@@ -13,13 +13,27 @@
                 />
             </v-col>
         </v-row>
+        <v-pagination
+            v-model="page"
+            :length="totalPages"
+        >
+        </v-pagination>
     </v-main>
 </template>
 
 <script lang="ts" setup>
+import { ref, computed, ComputedRef, watch } from 'vue';
 import Card from '@/components/Card.vue'
 import { useAnnouncementStore } from '@/store/announcement';
 
 const announcementStore = useAnnouncementStore();
+
+let totalPages = computed(() => announcementStore.getTotalPages)
+
+let page = ref<number>(1);
+
+watch(page, (curr => {
+    announcementStore.setPage(page.value)
+}))
 
 </script>

@@ -30,8 +30,10 @@ class AnnouncementService {
         return AxiosService.get(`${this.path}/cities`)
     }
 
-    getCityAndSubCategory(DTO: CityAndSubCategory) {
-        return AxiosService.post(`${this.path}/city-and-sub-category`, DTO)
+    getCityAndSubCategory(DTO: CityAndSubCategory, page: number, size: number) {
+        const INDEX_MINUS_ONE = 1;
+        page -= INDEX_MINUS_ONE;
+        return AxiosService.post(`${this.path}/city-and-sub-category?page=${page}&size=${size}`, DTO)
     }
 
     getByEmail(email: string, page: number, size: number) {

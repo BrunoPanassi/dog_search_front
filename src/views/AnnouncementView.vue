@@ -23,6 +23,13 @@
                     @delete="onDeleteDialog(item)" 
                 />
             </template>
+            <template v-slot:bottom>
+                <v-pagination
+                    v-model="page"
+                    :length="totalPages"
+                >
+                </v-pagination>
+            </template>
         </v-data-table>
         <Dialog 
             :dialog-clicked="deleteDialog" 
@@ -51,7 +58,7 @@
 
 <script lang="ts" setup>
 import AnnouncementService from '@/service/AnnouncementService';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Announcement } from '@/types/announcement'
 import TokenService from '@/service/TokenService';
 import ActionButtons from '@/components/ActionButtons.vue'
@@ -77,6 +84,9 @@ let dialog = ref<boolean>(false);
 let deleteDialog = ref<boolean>(false);
 
 let id = ref<number>(0);
+const defaultPageSize = 10;
+let page = ref<number>(1);
+let totalPages = ref<number>(0);
 
 const headers = [
     { title: "id", key: "id"},
@@ -120,8 +130,9 @@ const getAnnouncements = async() => {
         onLoading();
         const sub = TokenService.getSub()
         if (sub) {
-            const { data } = await AnnouncementService.getByEmail(sub);
-            announcements.value = data;
+            const { data } = await AnnouncementService.getByEmail(sub, page.value, defaultPageSize);
+            announcements.value = data.content;
+            totalPages.value = data.totalPages
         }
     } catch (e) {
         console.error(e);
@@ -140,6 +151,10 @@ const onDeleteAnnouncement = async () => {
         onLoading();
     }
 }
+
+watch(page, (currValue) => {
+    getAnnouncements();
+})
 
 onMounted(async() => {
     await getAnnouncements();

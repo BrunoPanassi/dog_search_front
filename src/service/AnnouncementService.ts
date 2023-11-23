@@ -34,8 +34,10 @@ class AnnouncementService {
         return AxiosService.post(`${this.path}/city-and-sub-category`, DTO)
     }
 
-    getByEmail(email: string) {
-        return AxiosService.get(`${this.path}/by-email/${email}`, TokenService.getAuthorizationHeader())
+    getByEmail(email: string, page: number, size: number) {
+        const INDEX_MINUS_ONE = 1;
+        page -= INDEX_MINUS_ONE;
+        return AxiosService.get(`${this.path}/by-email/${email}?page=${page}&size=${size}`, TokenService.getAuthorizationHeader())
     }
 }
 

@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, ComputedRef, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Card from '@/components/Card.vue'
 import { useAnnouncementStore } from '@/store/announcement';
 
